@@ -13,7 +13,7 @@
         {% if resultats %}
             <ul>
             {% for row in resultats %}
-                <li><strong>{{ row[0] }}</strong></li>
+                <li><strong>{{ row['mot'] }}</strong></li>
             {% endfor %}
             </ul>
         {% else %}
