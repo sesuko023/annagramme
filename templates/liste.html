@@ -7,11 +7,12 @@
     
     {% if mots %}
         <ul>
-        {% for mot in mots %}
-            <li><strong>{{ mot }}</strong> <span style="color: #7f8c8d; font-size: 0.85em;">(clé: {{ mot_signatures[loop.index0] }})</span></li>
+        {% for item in mots %}
+            <li><strong>{{ item['mot'] }}</strong> <span style="color: #7f8c8d; font-size: 0.85em;">(signature : {{ item['signature'] }})</span></li>
         {% endfor %}
         </ul>
     {% else %}
+
         <p>La base de données est actuellement vide.</p>
     {% endif %}
 </div>
