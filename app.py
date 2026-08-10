@@ -1,110 +1,107 @@
 import os
-import psycopg  # <-- Changement ici
-from flask import Flask, request, render_template_string
+import psycopg
+from flask import Flask, request, render_template, redirect, url_for, session
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'une-cle-tres-secrete-ici')
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 def initialiser_bdd():
-    """Crée la table des mots si elle n'existe pas encore."""
-    conn = psycopg.connect(DATABASE_URL)  # <-- Utilise psycopg
+    conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS anagrammes (
-            id SERIAL PRIMARY KEY,
-            signature TEXT NOT NULL,
-            mot TEXT NOT NULL UNIQUE
-        );
-    """)
+    cur.execute("CREATE TABLE IF NOT EXISTS anagrammes (id SERIAL PRIMARY KEY, signature TEXT NOT NULL, mot TEXT NOT NULL UNIQUE);")
+    cur.execute("CREATE TABLE IF NOT EXISTS utilisateurs (id SERIAL PRIMARY KEY, identifiant TEXT NOT NULL UNIQUE, mot_de_passe_hache TEXT NOT NULL);")
     conn.commit()
     cur.close()
     conn.close()
 
 def generer_signature(mot):
-    """Trie les lettres d'un mot par ordre alphabétique."""
     return "".join(sorted(mot.lower().strip()))
-
-HTML_PAGE = """
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Mon Anagrammeur Web Pro</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; line-height: 1.6; }
-        .section { background: #f4f4f9; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
-        input[type="text"] { width: 70%; padding: 8px; margin-right: 10px; }
-        input[type="submit"] { padding: 8px 15px; background: #007BFF; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .message { color: green; font-weight: bold; }
-        ul { background: #e2e2e2; padding: 10px 30px; border-radius: 4px; }
-    </style>
-</head>
-<body>
-    <h1>🔤 Anagrammeur Cloud</h1>
-    {% if message %}<p class="message">{{ message }}</p>{% endif %}
-    <div class="section">
-        <h2>📥 Ajouter un mot</h2>
-        <form method="POST" action="/ajouter">
-            <input type="text" name="nouveau_mot" placeholder="Ex: chien" required>
-            <input type="submit" value="Ajouter">
-        </form>
-    </div>
-    <div class="section">
-        <h2>🔎 Rechercher par lettres</h2>
-        <form method="GET" action="/rechercher">
-            <input type="text" name="lettres" placeholder="Ex: ehcin" required>
-            <input type="submit" value="Rechercher">
-        </form>
-        {% if resultats is not none %}
-            <h3>Résultats pour "{{ tirage }}" :</h3>
-            {% if resultats %}
-                <ul>{% for mot in resultats %}<li><strong>{{ mot }}</strong></li>{% endfor %}</ul>
-            {% else %}<p>Aucun anagramme trouvé.</p>{% endif %}
-        {% endif %}
-    </div>
-</body>
-</html>
-"""
 
 @app.route('/')
 def index():
-    return render_template_string(HTML_PAGE, resultats=None)
-
-@app.route('/ajouter', methods=['POST'])
-def ajouter():
-    mot = request.form.get('nouveau_mot', '').strip().lower()
-    msg = ""
-    if mot:
-        sig = generer_signature(mot)
-        try:
-            conn = psycopg.connect(DATABASE_URL)  # <-- Utilise psycopg
-            cur = conn.cursor()
-            cur.execute("INSERT INTO anagrammes (signature, mot) VALUES (%s, %s)", (sig, mot))
-            conn.commit()
-            msg = f"Le mot '{mot}' a bien été enregistré dans le cloud !"
-        except Exception:  # <-- Plus générique pour attraper le doublon simplement
-            msg = f"Le mot '{mot}' existe déjà ou une erreur est survenue."
-        finally:
-            cur.close()
-            conn.close()
-    return render_template_string(HTML_PAGE, message=msg, resultats=None)
+    if 'utilisateur' not in session: return redirect(url_for('connexion'))
+    return render_template('index.html', resultats=None)
 
 @app.route('/rechercher', methods=['GET'])
 def rechercher():
+    if 'utilisateur' not in session: return redirect(url_for('connexion'))
     lettres = request.args.get('lettres', '').strip()
     sig = generer_signature(lettres)
-    
-    conn = psycopg.connect(DATABASE_URL)  # <-- Utilise psycopg
+    conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("SELECT mot FROM anagrammes WHERE signature = %s", (sig,))
-    resultats = [row[0] for row in cur.fetchall()]  # <-- Petite correction pour extraire proprement le texte
+    resultats = cur.fetchall()
     cur.close()
     conn.close()
-    
-    return render_template_string(HTML_PAGE, resultats=resultats, tirage=lettres)
+    return render_template('index.html', resultats=resultats, tirage=lettres)
+
+@app.route('/ajouter-mot', methods=['GET', 'POST'])
+def ajouter_mot():
+    if 'utilisateur' not in session: return redirect(url_for('connexion'))
+    msg = ""
+    if request.method == 'POST':
+        mot = request.form.get('nouveau_mot', '').strip().lower()
+        if mot:
+            sig = generer_signature(mot)
+            try:
+                conn = psycopg.connect(DATABASE_URL)
+                cur = conn.cursor()
+                cur.execute("INSERT INTO anagrammes (signature, mot) VALUES (%s, %s)", (sig, mot))
+                conn.commit()
+                msg = f"Le mot '{mot}' a bien été enregistré !"
+            except Exception:
+                msg = f"Le mot '{mot}' existe déjà ou une erreur est survenue."
+            finally:
+                cur.close()
+                conn.close()
+    return render_template('ajouter.html', message=msg)
+
+@app.route('/connexion', methods=['GET', 'POST'])
+def connexion():
+    erreur = None
+    if request.method == 'POST':
+        identifiant = request.form.get('identifiant', '').strip()
+        mot_de_passe = request.form.get('mot_de_passe', '')
+        conn = psycopg.connect(DATABASE_URL)
+        cur = conn.cursor()
+        cur.execute("SELECT mot_de_passe_hache FROM utilisateurs WHERE identifiant = %s", (identifiant,))
+        compte = cur.fetchone()
+        cur.close()
+        conn.close()
+        if compte and check_password_hash(compte[0], mot_de_passe):
+            session['utilisateur'] = identifiant
+            return redirect(url_for('index'))
+        erreur = "Identifiant ou mot de passe incorrect."
+    return render_template('connexion.html', erreur=erreur)
+
+@app.route('/inscription', methods=['GET', 'POST'])
+def inscription():
+    erreur = None
+    if request.method == 'POST':
+        identifiant = request.form.get('identifiant', '').strip()
+        mot_de_passe = request.form.get('mot_de_passe', '')
+        if identifiant and mot_de_passe:
+            hache = generate_password_hash(mot_de_passe)
+            try:
+                conn = psycopg.connect(DATABASE_URL)
+                cur = conn.cursor()
+                cur.execute("INSERT INTO utilisateurs (identifiant, mot_de_passe_hache) VALUES (%s, %s)", (identifiant, hache))
+                conn.commit()
+                cur.close()
+                conn.close()
+                session['utilisateur'] = identifiant
+                return redirect(url_for('index'))
+            except Exception:
+                erreur = "Cet identifiant est déjà pris."
+    return render_template('inscription.html', erreur=erreur)
+
+@app.route('/deconnexion')
+def deconnexion():
+    session.pop('utilisateur', None)
+    return redirect(url_for('connexion'))
 
 if __name__ == '__main__':
-    if DATABASE_URL:
-        initialiser_bdd()
+    if DATABASE_URL: initialiser_bdd()
     app.run(debug=True)
