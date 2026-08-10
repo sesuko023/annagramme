@@ -52,10 +52,14 @@ def rechercher():
     conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("SELECT mot FROM anagrammes WHERE signature = %s", (sig,))
+    
+    # CORRECTION ICI : On extrait proprement le texte [row[0]] au lieu de garder toute la ligne SQL
     resultats = [row[0] for row in cur.fetchall()]
+    
     cur.close()
     conn.close()
     return render_template('index.html', resultats=resultats, tirage=lettres)
+
 
 @app.route('/ajouter-mot', methods=['GET', 'POST'])
 def ajouter_mot():
