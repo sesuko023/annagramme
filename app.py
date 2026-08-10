@@ -6,12 +6,10 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'une-cle-tres-secrete-ici')
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
-# Vos identifiants uniques configurés dans Render (ou valeurs par défaut ci-dessous)
 COMPTE_USER = os.environ.get('AUTH_USER', 'admin')
 COMPTE_PASSWORD = os.environ.get('AUTH_PASSWORD', 'admin123')
 
 def initialiser_bdd():
-    """Crée uniquement la table des anagrammes."""
     conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("CREATE TABLE IF NOT EXISTS anagrammes (id SERIAL PRIMARY KEY, signature TEXT NOT NULL, mot TEXT NOT NULL UNIQUE);")
@@ -21,6 +19,25 @@ def initialiser_bdd():
 
 def generer_signature(mot):
     return "".join(sorted(mot.lower().strip()))
+
+# --- INJECTION DU COMPTEUR DE MOTS DANS TOUTES LES PAGES ---
+@app.context_processor
+def injecter_compteur_mots():
+    """Compte automatiquement le nombre total de mots pour l'afficher dans le menu."""
+    if 'utilisateur' not in session or not DATABASE_URL:
+        return dict(total_mots=0)
+    try:
+        conn = psycopg.connect(DATABASE_URL)
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) FROM anagrammes;")
+        total = cur.fetchone()[0]
+        cur.close()
+        conn.close()
+        return dict(total_mots=total)
+    except Exception:
+        return dict(total_mots=0)
+
+# --- ROUTES DE L'APPLICATION ---
 
 @app.route('/')
 def index():
@@ -35,7 +52,7 @@ def rechercher():
     conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("SELECT mot FROM anagrammes WHERE signature = %s", (sig,))
-    resultats = cur.fetchall()
+    resultats = [row[0] for row in cur.fetchall()]
     cur.close()
     conn.close()
     return render_template('index.html', resultats=resultats, tirage=lettres)
@@ -61,18 +78,29 @@ def ajouter_mot():
                 conn.close()
     return render_template('ajouter.html', message=msg)
 
+@app.route('/liste-mots')
+def liste_mots():
+    if 'utilisateur' not in session: return redirect(url_for('connexion'))
+    conn = psycopg.connect(DATABASE_URL)
+    cur = conn.cursor()
+    cur.execute("SELECT mot, signature FROM anagrammes ORDER BY mot ASC;")
+    donnees = cur.fetchall()
+    cur.close()
+    conn.close()
+    
+    mots = [row[0] for row in donnees]
+    signatures = [row[1] for row in donnees]
+    return render_template('liste.html', mots=mots, mot_signatures=signatures)
+
 @app.route('/connexion', methods=['GET', 'POST'])
 def connexion():
     erreur = None
     if request.method == 'POST':
         identifiant = request.form.get('identifiant', '').strip()
         mot_de_passe = request.form.get('mot_de_passe', '')
-        
-        # Vérification directe avec les variables d'environnement
         if identifiant == COMPTE_USER and mot_de_passe == COMPTE_PASSWORD:
             session['utilisateur'] = identifiant
             return redirect(url_for('index'))
-        
         erreur = "Identifiant ou mot de passe incorrect."
     return render_template('connexion.html', erreur=erreur)
 
