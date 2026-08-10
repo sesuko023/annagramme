@@ -1,17 +1,20 @@
 import os
 import psycopg
 from flask import Flask, request, render_template, redirect, url_for, session
-from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'une-cle-tres-secrete-ici')
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
+# Vos identifiants uniques configurés dans Render (ou valeurs par défaut ci-dessous)
+COMPTE_USER = os.environ.get('AUTH_USER', 'admin')
+COMPTE_PASSWORD = os.environ.get('AUTH_PASSWORD', 'admin123')
+
 def initialiser_bdd():
+    """Crée uniquement la table des anagrammes."""
     conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("CREATE TABLE IF NOT EXISTS anagrammes (id SERIAL PRIMARY KEY, signature TEXT NOT NULL, mot TEXT NOT NULL UNIQUE);")
-    cur.execute("CREATE TABLE IF NOT EXISTS utilisateurs (id SERIAL PRIMARY KEY, identifiant TEXT NOT NULL UNIQUE, mot_de_passe_hache TEXT NOT NULL);")
     conn.commit()
     cur.close()
     conn.close()
@@ -64,38 +67,14 @@ def connexion():
     if request.method == 'POST':
         identifiant = request.form.get('identifiant', '').strip()
         mot_de_passe = request.form.get('mot_de_passe', '')
-        conn = psycopg.connect(DATABASE_URL)
-        cur = conn.cursor()
-        cur.execute("SELECT mot_de_passe_hache FROM utilisateurs WHERE identifiant = %s", (identifiant,))
-        compte = cur.fetchone()
-        cur.close()
-        conn.close()
-        if compte and check_password_hash(compte[0], mot_de_passe):
+        
+        # Vérification directe avec les variables d'environnement
+        if identifiant == COMPTE_USER and mot_de_passe == COMPTE_PASSWORD:
             session['utilisateur'] = identifiant
             return redirect(url_for('index'))
+        
         erreur = "Identifiant ou mot de passe incorrect."
     return render_template('connexion.html', erreur=erreur)
-
-@app.route('/inscription', methods=['GET', 'POST'])
-def inscription():
-    erreur = None
-    if request.method == 'POST':
-        identifiant = request.form.get('identifiant', '').strip()
-        mot_de_passe = request.form.get('mot_de_passe', '')
-        if identifiant and mot_de_passe:
-            hache = generate_password_hash(mot_de_passe)
-            try:
-                conn = psycopg.connect(DATABASE_URL)
-                cur = conn.cursor()
-                cur.execute("INSERT INTO utilisateurs (identifiant, mot_de_passe_hache) VALUES (%s, %s)", (identifiant, hache))
-                conn.commit()
-                cur.close()
-                conn.close()
-                session['utilisateur'] = identifiant
-                return redirect(url_for('index'))
-            except Exception:
-                erreur = "Cet identifiant est déjà pris."
-    return render_template('inscription.html', erreur=erreur)
 
 @app.route('/deconnexion')
 def deconnexion():
