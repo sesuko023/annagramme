@@ -10,15 +10,15 @@
         {% for item in mots %}
             <li style="display: flex; align-items: center; margin-bottom: 10px; background: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px solid #e2e8f0;">
                 
-                <!-- AJOUT DE LA SÉCURITÉ ICI : onsubmit="return confirm(...)" -->
-                <form method="POST" action="/supprimer-mot" style="margin-right: 15px; display: inline;" onsubmit="return confirm('Voulez-vous vraiment supprimer le mot {{ item[\'mot\'] }} ?');">
-                    <input type="hidden" name="mot_a_supprimer" value="{{ item['mot'] }}">
+                <!-- CORRECTION ICI : Utilisation de item.mot sans guillemets ni antislashs -->
+                <form method="POST" action="/supprimer-mot" style="margin-right: 15px; display: inline;" onsubmit="return confirm('Voulez-vous vraiment supprimer le mot {{ item.mot }} ?');">
+                    <input type="hidden" name="mot_a_supprimer" value="{{ item.mot }}">
                     <button type="submit" style="background: none; border: none; cursor: pointer; font-size: 1.1em;" title="Supprimer ce mot">❌</button>
                 </form>
                 
                 <div>
-                    <strong>{{ item['mot'] }}</strong> 
-                    <span style="color: #7f8c8d; font-size: 0.85em; margin-left: 10px;">(signature : {{ item['signature'] }})</span>
+                    <strong>{{ item.mot }}</strong> 
+                    <span style="color: #7f8c8d; font-size: 0.85em; margin-left: 10px;">(signature : {{ item.signature }})</span>
                 </div>
             </li>
         {% endfor %}
