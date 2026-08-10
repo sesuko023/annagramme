@@ -49,20 +49,53 @@ def index():
     if 'utilisateur' not in session: return redirect(url_for('connexion'))
     return render_template('index.html', resultats=None)
 
+from collections import Counter  # <-- Ajoutez cet import tout en haut du fichier app.py
+
+# ... (gardez le reste du code identique jusqu'à la route /rechercher) ...
+
 @app.route('/rechercher', methods=['GET'])
 def rechercher():
     if 'utilisateur' not in session: return redirect(url_for('connexion'))
     lettres = request.args.get('lettres', '').strip()
-    sig = generer_signature(lettres)
     
+    # 1. On nettoie la saisie (ex: liree -> LIREE)
+    lettres_propres = nettoyer_mot(lettres)
+    # 2. On compte les lettres saisies (ex: LIREE -> {'E': 2, 'L': 1, 'I': 1, 'R': 1})
+    compteur_recherche = Counter(lettres_propres)
+    
+    # 3. On récupère TOUS les mots de la base pour les analyser
     conn = psycopg.connect(DATABASE_URL, row_factory=dict_row)
     cur = conn.cursor()
-    cur.execute("SELECT mot FROM anagrammes WHERE signature = %s", (sig,))
-    resultats = cur.fetchall()
+    cur.execute("SELECT mot, signature FROM anagrammes;")
+    tous_les_mots = cur.fetchall()
     cur.close()
     conn.close()
     
-    return render_template('index.html', resultats=resultats, tirage=nettoyer_mot(lettres))
+    resultats = []
+    # 4. On filtre les mots un par un
+    for item in tous_les_mots:
+        mot_bdd = item['mot']
+        # Si le mot de la base est plus long que notre saisie, il ne peut pas être inclus
+        if len(mot_bdd) > len(lettres_propres):
+            continue
+            
+        compteur_mot = Counter(mot_bdd)
+        
+        # On vérifie si chaque lettre du mot de la BDD est disponible dans notre saisie
+        inclus = True
+        for lettre, quantite in compteur_mot.items():
+            if compteur_recherche[lettre] < quantite:
+                inclus = False
+                break
+                
+        if inclus:
+            resultats.append({'mot': mot_bdd})
+            
+    # Optionnel : On peut trier les résultats du plus long au plus court mot trouvé
+    resultats = sorted(resultats, key=lambda x: len(x['mot']), reverse=True)
+    
+    return render_template('index.html', resultats=resultats, tirage=lettres_propres)
+
 
 @app.route('/ajouter-mot', methods=['GET', 'POST'])
 def ajouter_mot():
