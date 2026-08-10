@@ -115,6 +115,10 @@ def deconnexion():
     session.pop('utilisateur', None)
     return redirect(url_for('connexion'))
 
+# On force l'initialisation des tables dès le chargement du fichier par Render/Gunicorn
+if DATABASE_URL: 
+    initialiser_bdd()
+
 if __name__ == '__main__':
-    if DATABASE_URL: initialiser_bdd()
     app.run(debug=True)
+
