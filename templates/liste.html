@@ -1,1 +1,18 @@
-
+{% extends "layout.html" %}
+{% block title %}Liste des mots{% endblock %}
+{% block content %}
+<div class="container">
+    <h1>📋 Liste complète des mots</h1>
+    <p>Il y a actuellement <strong>{{ mots|length }}</strong> mot(s) enregistré(s) dans la base de données.</p>
+    
+    {% if mots %}
+        <ul>
+        {% for mot in mots %}
+            <li><strong>{{ mot }}</strong> <span style="color: #7f8c8d; font-size: 0.85em;">(clé: {{ mot_signatures[loop.index0] }})</span></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>La base de données est actuellement vide.</p>
+    {% endif %}
+</div>
+{% endblock %}
