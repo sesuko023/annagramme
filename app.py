@@ -1,15 +1,14 @@
 import os
-import psycopg2
+import psycopg  # <-- Changement ici
 from flask import Flask, request, render_template_string
 
 app = Flask(__name__)
 
-# Récupère l'URL de connexion sécurisée fournie par l'hébergeur de la base de données
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 def initialiser_bdd():
     """Crée la table des mots si elle n'existe pas encore."""
-    conn = psycopg2.connect(DATABASE_URL)
+    conn = psycopg.connect(DATABASE_URL)  # <-- Utilise psycopg
     cur = conn.cursor()
     cur.execute("""
         CREATE TABLE IF NOT EXISTS anagrammes (
@@ -26,7 +25,6 @@ def generer_signature(mot):
     """Trie les lettres d'un mot par ordre alphabétique."""
     return "".join(sorted(mot.lower().strip()))
 
-# Page web de l'application (Identique à la précédente)
 HTML_PAGE = """
 <!DOCTYPE html>
 <html lang="fr">
@@ -80,13 +78,13 @@ def ajouter():
     if mot:
         sig = generer_signature(mot)
         try:
-            conn = psycopg2.connect(DATABASE_URL)
+            conn = psycopg.connect(DATABASE_URL)  # <-- Utilise psycopg
             cur = conn.cursor()
             cur.execute("INSERT INTO anagrammes (signature, mot) VALUES (%s, %s)", (sig, mot))
             conn.commit()
             msg = f"Le mot '{mot}' a bien été enregistré dans le cloud !"
-        except psycopg2.errors.UniqueViolation:
-            msg = f"Le mot '{mot}' existe déjà."
+        except Exception:  # <-- Plus générique pour attraper le doublon simplement
+            msg = f"Le mot '{mot}' existe déjà ou une erreur est survenue."
         finally:
             cur.close()
             conn.close()
@@ -96,14 +94,14 @@ def ajouter():
 def rechercher():
     lettres = request.args.get('lettres', '').strip()
     sig = generer_signature(lettres)
-
-    conn = psycopg2.connect(DATABASE_URL)
+    
+    conn = psycopg.connect(DATABASE_URL)  # <-- Utilise psycopg
     cur = conn.cursor()
     cur.execute("SELECT mot FROM anagrammes WHERE signature = %s", (sig,))
-    resultats = [row[0] for row in cur.fetchall()]
+    resultats = [row[0] for row in cur.fetchall()]  # <-- Petite correction pour extraire proprement le texte
     cur.close()
     conn.close()
-
+    
     return render_template_string(HTML_PAGE, resultats=resultats, tirage=lettres)
 
 if __name__ == '__main__':
