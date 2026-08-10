@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block title %}Ajouter un mot{% endblock %}
+{% block content %}
+<div class="container">
+    <h1>📥 Ajouter un nouveau mot</h1>
+    {% if message %}<p class="message">{{ message }}</p>{% endif %}
+    <form method="POST">
+        <input type="text" name="nouveau_mot" placeholder="Ex: chien" required>
+        <input type="submit" value="Ajouter dans la base">
+    </form>
+</div>
+{% endblock %}
