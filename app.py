@@ -92,9 +92,11 @@ def liste_mots():
     cur.close()
     conn.close()
     
+    # CORRECTION ICI : Extraction propre du mot et de sa signature
     mots = [row[0] for row in donnees]
     signatures = [row[1] for row in donnees]
     return render_template('liste.html', mots=mots, mot_signatures=signatures)
+
 
 @app.route('/connexion', methods=['GET', 'POST'])
 def connexion():
