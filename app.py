@@ -1,6 +1,6 @@
 import os
 import psycopg
-import unicodedata  # <-- Ajouté pour gérer le retrait des accents
+import unicodedata
 from psycopg.rows import dict_row
 from flask import Flask, request, render_template, redirect, url_for, session
 
@@ -20,17 +20,13 @@ def initialiser_bdd():
     conn.close()
 
 def nettoyer_mot(mot):
-    """Transforme le mot en majuscules et retire tous les accents (ex: élire -> ELIRE)."""
     if not mot:
         return ""
-    # Étape 1 : Décompose les caractères accentués (ex: é devient e + accent aigu)
     mot_decompose = unicodedata.normalize('NFD', mot.strip())
-    # Étape 2 : Filtre pour ne garder que les lettres de base et passe en majuscules
     mot_propre = "".join([c for c in mot_decompose if unicodedata.category(c) != 'Mn']).upper()
     return mot_propre
 
 def generer_signature(mot):
-    """Trie les lettres du mot propre dans l'ordre alphabétique."""
     return "".join(sorted(nettoyer_mot(mot)))
 
 @app.context_processor
@@ -57,8 +53,6 @@ def index():
 def rechercher():
     if 'utilisateur' not in session: return redirect(url_for('connexion'))
     lettres = request.args.get('lettres', '').strip()
-    
-    # Recherche basée sur la signature nettoyée en majuscules sans accent
     sig = generer_signature(lettres)
     
     conn = psycopg.connect(DATABASE_URL, row_factory=dict_row)
@@ -75,7 +69,6 @@ def ajouter_mot():
     if 'utilisateur' not in session: return redirect(url_for('connexion'))
     msg = ""
     if request.method == 'POST':
-        # On applique le nettoyage complet sur le mot reçu
         mot = nettoyer_mot(request.form.get('nouveau_mot', ''))
         if mot:
             sig = generer_signature(mot)
@@ -102,6 +95,24 @@ def liste_mots():
     cur.close()
     conn.close()
     return render_template('liste.html', mots=donnees)
+
+# --- NOUVELLE ACTION : SUPPRIMER UN MOT ---
+@app.route('/supprimer-mot', methods=['POST'])
+def supprimer_mot():
+    if 'utilisateur' not in session: return redirect(url_for('connexion'))
+    mot_a_supprimer = request.form.get('mot_a_supprimer', '')
+    
+    if mot_a_supprimer:
+        conn = psycopg.connect(DATABASE_URL, row_factory=dict_row)
+        cur = conn.cursor()
+        # Supprime le mot exact de la base de données
+        cur.execute("DELETE FROM anagrammes WHERE mot = %s;", (mot_a_supprimer,))
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+    # Une fois supprimé, on recharge la page de la liste automatiquement
+    return redirect(url_for('liste_mots'))
 
 @app.route('/connexion', methods=['GET', 'POST'])
 def connexion():
