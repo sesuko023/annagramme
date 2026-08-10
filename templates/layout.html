@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %} - Anagrammeur</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; display: flex; height: 100vh; background: #f8f9fa; }
+        .sidebar { width: 250px; background: #2c3e50; color: white; display: flex; flex-direction: column; padding: 20px 0; box-sizing: border-box; }
+        .sidebar h2 { text-align: center; margin-bottom: 30px; font-size: 1.5em; color: #ecf0f1; }
+        .sidebar a { padding: 15px 25px; color: #bdc3c7; text-decoration: none; font-size: 1.1em; transition: 0.2s; border-left: 4px solid transparent; }
+        .sidebar a:hover { background: #34495e; color: white; border-left-color: #3498db; }
+        .sidebar a.active { background: #34495e; color: white; border-left-color: #2ecc71; font-weight: bold; }
+        .sidebar .user-info { margin-top: auto; padding: 20px; background: #1a252f; text-align: center; font-size: 0.9em; }
+        .sidebar .btn-logout { display: inline-block; margin-top: 10px; background: #e74c3c; color: white; padding: 5px 15px; text-decoration: none; border-radius: 4px; }
+        .content { flex: 1; padding: 40px; box-sizing: border-box; overflow-y: auto; }
+        .container { max-width: 700px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .section { margin-bottom: 25px; }
+        h1 { color: #2c3e50; margin-top: 0; }
+        input[type="text"], input[type="password"] { width: 70%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; margin-bottom: 10px; }
+        .auth-box input[type="text"], .auth-box input[type="password"] { width: 100%; }
+        input[type="submit"] { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; font-weight: bold; }
+        input[type="submit"]:hover { background: #2980b9; }
+        .message { color: #27ae60; font-weight: bold; padding: 10px; background: #e8f8f5; border-radius: 4px; }
+        .error { color: #e74c3c; font-weight: bold; }
+        ul { background: #f1f2f6; padding: 15px 35px; border-radius: 4px; }
+        li { margin-bottom: 5px; font-size: 1.1em; color: #2f3542; }
+        .auth-container { max-width: 400px; margin: 80px auto; }
+    </style>
+</head>
+<body>
+    {% if session.get('utilisateur') %}
+    <div class="sidebar">
+        <h2>🔤 Anagrammeur</h2>
+        <a href="/" class="{% if request.endpoint == 'index' or request.endpoint == 'rechercher' %}active{% endif %}">🔎 Rechercher</a>
+        <a href="/ajouter-mot" class="{% if request.endpoint == 'ajouter_mot' %}active{% endif %}">📥 Ajouter un mot</a>
+        <div class="user-info">
+            Connecté : <strong>{{ session['utilisateur'] }}</strong><br>
+            <a href="/deconnexion" class="btn-logout">Déconnexion</a>
+        </div>
+    </div>
+    {% endif %}
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
