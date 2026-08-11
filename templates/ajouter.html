@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-<h1>📥 Push un mot (Ajout manuel)</h1>
+<h1><i class="bi bi-plus-circle"></i> Ajout manuel</h1>
 {% if msg %}<div class="message">{{ msg }}</div>{% endif %}
 {% if err %}<div class="error">{{ err }}</div>{% endif %}
 <form method="POST" action="/ajouter">
