@@ -3,42 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>Anagram-Repo</title>
-    <!-- Intégration des icônes textuelles modernes -->
     <link rel="stylesheet" href="https://jsdelivr.net">
     <style>
-        :root {
-            --bg-main: #ffffff; --bg-sidebar: #f6f8fa; --text-main: #1f2328;
-            --border-color: #d0d7de; --bg-badge: #eff1f3; --text-badge: #57606a;
-            --bg-input: #f6f8fa; --bg-box: #ffffff;
-        }
-        [data-theme="dark"] {
-            --bg-main: #0d1117; --bg-sidebar: #161b22; --text-main: #e6edf3;
-            --border-color: #30363d; --bg-badge: #21262d; --text-badge: #8b949e;
-            --bg-input: #0d1117; --bg-box: #161b22;
-        }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; 
-            margin: 0; padding: 0; display: flex; height: 100vh; 
-            background: var(--bg-main); color: var(--text-main); transition: background 0.2s, color 0.2s;
-        }
-        .sidebar { 
-            width: 260px; background: var(--bg-sidebar); display: flex; flex-direction: column; 
-            padding: 24px 0; box-sizing: border-box; border-right: 1px solid var(--border-color);
-        }
+        :root { --bg-main: #ffffff; --bg-sidebar: #f6f8fa; --text-main: #1f2328; --border-color: #d0d7de; --bg-badge: #eff1f3; --text-badge: #57606a; --bg-input: #f6f8fa; --bg-box: #ffffff; }
+        [data-theme="dark"] { --bg-main: #0d1117; --bg-sidebar: #161b22; --text-main: #e6edf3; --border-color: #30363d; --bg-badge: #21262d; --text-badge: #8b949e; --bg-input: #0d1117; --bg-box: #161b22; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; margin: 0; padding: 0; display: flex; height: 100vh; background: var(--bg-main); color: var(--text-main); transition: background 0.2s; }
+        .sidebar { width: 260px; background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 24px 0; box-sizing: border-box; border-right: 1px solid var(--border-color); }
         .sidebar h2 { font-size: 1.1em; font-weight: 600; padding: 0 16px; margin: 0 0 20px 0; display: flex; align-items: center; gap: 8px; }
-        .sidebar a { 
-            padding: 8px 16px; color: var(--text-main); text-decoration: none; font-size: 0.95em; 
-            display: flex; align-items: center; gap: 10px; border-left: 3px solid transparent;
-        }
+        .sidebar a { padding: 8px 16px; color: var(--text-main); text-decoration: none; font-size: 0.95em; display: flex; align-items: center; gap: 10px; border-left: 3px solid transparent; }
         .sidebar a i { font-size: 1.1em; color: var(--text-badge); }
         .sidebar a:hover { background: var(--border-color); }
         .sidebar a.active { background: var(--bg-main); font-weight: 600; border-left-color: #fd8c73; }
         .sidebar a.active i { color: var(--text-main); }
-        .theme-btn {
-            margin: 8px 16px; padding: 6px 12px; background: var(--bg-main); color: var(--text-main);
-            border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85em;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
+        .theme-btn { margin: 8px 16px; padding: 6px 12px; background: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85em; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .sidebar .counter-box { margin: 0 16px 16px 16px; font-size: 0.85em; background: var(--bg-input); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px; }
         .sidebar .user-info { margin-top: auto; padding: 16px; border-top: 1px solid var(--border-color); font-size: 0.85em; }
         .sidebar .btn-logout { display: block; margin-top: 8px; background: var(--bg-sidebar); color: #cf222e; padding: 4px 12px; text-decoration: none; border: 1px solid var(--border-color); border-radius: 6px; text-align: center; font-weight: 600; }
@@ -46,198 +23,46 @@
         .content { flex: 1; padding: 32px; box-sizing: border-box; overflow-y: auto; display: flex; justify-content: center; align-items: flex-start; }
         .container { width: 100%; max-width: 800px; padding: 24px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-box); }
         h1 { font-size: 1.5em; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        h1 i { color: var(--text-badge); }
-        input[type="text"], input[type="password"], textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9em; background: var(--bg-input); color: var(--text-main); box-sizing: border-box; margin-bottom: 15px; }
+        input[type="text"], input[type="password"], textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-input); color: var(--text-main); box-sizing: border-box; margin-bottom: 15px; }
         textarea { resize: vertical; font-family: monospace; }
-        input[type="submit"] { padding: 6px 16px; background: #1f883d; color: #ffffff; border: 1px solid rgba(31,136,61,0.15); border-radius: 6px; cursor: pointer; font-size: 0.9em; font-weight: 600; }
-        input[type="submit"]:hover { background: #1a7f37; }
-        .message { color: #1a7f37; font-size: 0.9em; padding: 12px 16px; background: #dafbe1; border: 1px solid #4ac26b; border-radius: 6px; margin-bottom: 16px;}
-        .error { color: #cf222e; font-size: 0.9em; padding: 12px 16px; background: #ffebe9; border: 1px solid #ff8181; border-radius: 6px; margin-bottom: 16px;}
+        input[type="submit"] { padding: 6px 16px; background: #1f883d; color: #ffffff; border: 1px solid rgba(31,136,61,0.15); border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .message { color: #1a7f37; padding: 12px 16px; background: #dafbe1; border: 1px solid #4ac26b; border-radius: 6px; margin-bottom: 16px;}
+        .error { color: #cf222e; padding: 12px 16px; background: #ffebe9; border: 1px solid #ff8181; border-radius: 6px; margin-bottom: 16px;}
         ul { padding: 0; margin: 16px 0; list-style: none; border: 1px solid var(--border-color); border-radius: 6px;}
-        li { padding: 12px 16px; font-size: 0.95em; border-bottom: 1px solid var(--border-color); background: var(--bg-box); display: flex; justify-content: space-between; align-items: center; }
-        .badge { background: var(--bg-badge); color: var(--text-badge); font-size: 0.8em; padding: 2px 8px; border-radius: 2em; border: 1px solid var(--border-color); font-family: monospace; }
-        
-        .auth-body { background: #f6f8fa; height: 100vh; display: flex; justify-content: center; align-items: center; width: 100vw; margin: 0; padding: 0;}
-        .auth-box { background: #ffffff; padding: 34px; border: 1px solid #d0d7de; border-radius: 8px; width: 300px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); color: #1f2328; }
-        .auth-box h2 { font-size: 1.3em; font-weight: 600; margin-top: 0; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .auth-box input[type="text"], .auth-box input[type="password"] { background: #ffffff; }
-        .auth-box .links { margin-top: 15px; text-align: center; font-size: 0.85em; }
-        .auth-box .links a { color: #0969da; text-decoration: none; }
+        li { padding: 12px 16px; border-bottom: 1px solid var(--border-color); background: var(--bg-box); display: flex; justify-content: space-between; align-items: center;}
+        .badge { background: var(--bg-badge); color: var(--text-badge); font-size: 0.8em; padding: 2px 8px; border-radius: 2em; border: 1px solid var(--border-color); }
     </style>
-    <script>
-        document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');
-    </script>
-</head>
-<body>
-    {% if session.get('utilisateur') %}
-    <div class="sidebar">
-        <h2><i class="bi bi-terminal"></i> Anagram-Repo</h2>
-        
-        <div class="counter-box">
-            <i class="bi bi-database"></i> <span><strong>{{ total_mots }}</strong> mots indexés</span>
-        </div>
-
-        <a href="/" class="{% if page == 'index' %}active{% endif %}">
-            <i class="bi bi-search"></i> Code Query
-        </a>
-        <a href="/ajouter" class="{% if page == 'ajouter' %}active{% endif %}">
-            <i class="bi bi-plus-circle"></i> Push un mot
-        </a>
-        <a href="/importation-masse" class="{% if page == 'import' %}active{% endif %}">
-            <i class="bi bi-lightning-charge"></i> Bulk Import
-        </a>
-        <a href="/liste-mots" class="{% if page == 'liste' %}active{% endif %}">
-            <i class="bi bi-list-task"></i> Liste des mots
-        </a>
-        
-        <button id="theme-toggle" class="theme-btn">
-            <i class="bi bi-moon"></i> <span>Mode Sombre</span>
-        </button>
-        
-        <div class="user-info">
-            Actor: <strong>@{{ session.get('utilisateur') }}</strong>
-            <a href="/deconnexion" class="btn-logout">Sign out</a>
-        </div>
-    </div>
-    <div class="content">
-        <div class="container">
-            {% block content %}{% endblock %}
-        </div>
-    </div>
-    {% endif %}
-
-    <script>
-        const toggleBtn = document.getElementById('theme-toggle');
-        if (document.documentElement.getAttribute('data-theme') === 'dark' && toggleBtn) {
-            toggleBtn.querySelector('span').innerHTML = 'Mode Clair';
-            toggleBtn.querySelector('i').className = 'bi bi-sun';
-        }
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => {
-                const currentTheme = document.documentElement.getAttribute('data-theme');
-                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-                
-                const icon = toggleBtn.querySelector('i');
-                const text = toggleBtn.querySelector('span');
-                
-                if (newTheme === 'dark') {
-                    text.innerHTML = 'Mode Clair';
-                    icon.className = 'bi bi-sun';
-                } else {
-                    text.innerHTML = 'Mode Sombre';
-                    icon.className = 'bi bi-moon';
-                }
-                
-                document.documentElement.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-            });
-        }
-    </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="fr" data-theme="light">
-<head>
-    <meta charset="UTF-8">
-    <title>Anagram-Repo</title>
-    <style>
-        :root {
-            --bg-main: #ffffff; --bg-sidebar: #f6f8fa; --text-main: #1f2328;
-            --border-color: #d0d7de; --bg-badge: #eff1f3; --text-badge: #57606a;
-            --bg-input: #f6f8fa; --bg-box: #ffffff;
-        }
-        [data-theme="dark"] {
-            --bg-main: #0d1117; --bg-sidebar: #161b22; --text-main: #e6edf3;
-            --border-color: #30363d; --bg-badge: #21262d; --text-badge: #8b949e;
-            --bg-input: #0d1117; --bg-box: #161b22;
-        }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; 
-            margin: 0; padding: 0; display: flex; height: 100vh; 
-            background: var(--bg-main); color: var(--text-main); transition: background 0.2s, color 0.2s;
-        }
-        .sidebar { 
-            width: 260px; background: var(--bg-sidebar); display: flex; flex-direction: column; 
-            padding: 24px 0; box-sizing: border-box; border-right: 1px solid var(--border-color);
-        }
-        .sidebar h2 { font-size: 1.1em; font-weight: 600; padding: 0 16px; margin: 0 0 20px 0; }
-        .sidebar a { 
-            padding: 8px 16px; color: var(--text-main); text-decoration: none; font-size: 0.95em; 
-            display: flex; align-items: center; gap: 8px; border-left: 3px solid transparent;
-        }
-        .sidebar a:hover { background: var(--border-color); }
-        .sidebar a.active { background: var(--bg-main); font-weight: 600; border-left-color: #fd8c73; }
-        .theme-btn {
-            margin: 8px 16px; padding: 6px 12px; background: var(--bg-main); color: var(--text-main);
-            border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85em;
-        }
-        .sidebar .counter-box { margin: 0 16px 16px 16px; font-size: 0.85em; background: var(--bg-input); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); }
-        .sidebar .user-info { margin-top: auto; padding: 16px; border-top: 1px solid var(--border-color); font-size: 0.85em; }
-        .sidebar .btn-logout { display: block; margin-top: 8px; background: var(--bg-sidebar); color: #cf222e; padding: 4px 12px; text-decoration: none; border: 1px solid var(--border-color); border-radius: 6px; text-align: center; font-weight: 600; }
-        .sidebar .btn-logout:hover { background: #cf222e; color: #ffffff; }
-        .content { flex: 1; padding: 32px; box-sizing: border-box; overflow-y: auto; }
-        .container { max-width: 800px; padding: 24px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-box); }
-        h1 { font-size: 1.5em; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 20px;}
-        input[type="text"], input[type="password"], textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9em; background: var(--bg-input); color: var(--text-main); box-sizing: border-box; margin-bottom: 15px; }
-        textarea { resize: vertical; font-family: monospace; }
-        input[type="submit"] { padding: 6px 16px; background: #1f883d; color: #ffffff; border: 1px solid rgba(31,136,61,0.15); border-radius: 6px; cursor: pointer; font-size: 0.9em; font-weight: 600; }
-        input[type="submit"]:hover { background: #1a7f37; }
-        .message { color: #1a7f37; font-size: 0.9em; padding: 12px 16px; background: #dafbe1; border: 1px solid #4ac26b; border-radius: 6px; margin-bottom: 16px;}
-        .error { color: #cf222e; font-size: 0.9em; padding: 12px 16px; background: #ffebe9; border: 1px solid #ff8181; border-radius: 6px; margin-bottom: 16px;}
-        ul { padding: 0; margin: 16px 0; list-style: none; border: 1px solid var(--border-color); border-radius: 6px;}
-        li { padding: 12px 16px; font-size: 0.95em; border-bottom: 1px solid var(--border-color); background: var(--bg-box); display: flex; justify-content: space-between;}
-        .badge { background: var(--bg-badge); color: var(--text-badge); font-size: 0.8em; padding: 2px 8px; border-radius: 2em; border: 1px solid var(--border-color); font-family: monospace; }
-    </style>
-    <script>
-        document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');
-    </script>
+    <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');</script>
 </head>
 <body>
     {% if session.get('utilisateur') %}
     <div class="sidebar">
         <h2><i class="bi bi-terminal"></i> Anagrammeur</h2>
-        
-        <div class="counter-box">
-            <i class="bi bi-database"></i> <span><strong>{{ total_mots }}</strong> mots indexés</span>
-        </div>
-
-        <a href="/" class="{% if page == 'index' %}active{% endif %}">
-            <i class="bi bi-search"></i> Recherche
-        </a>
-        <a href="/ajouter" class="{% if page == 'ajouter' %}active{% endif %}">
-            <i class="bi bi-plus-circle"></i> Ajout manuel
-        </a>
-        <a href="/importation-masse" class="{% if page == 'import' %}active{% endif %}">
-            <i class="bi bi-lightning-charge"></i> Importation en masse
-        </a>
-        <a href="/liste-mots" class="{% if page == 'liste' %}active{% endif %}">
-            <i class="bi bi-list-task"></i> Liste des mots
-        </a>
-        
-        <button id="theme-toggle" class="theme-btn">
-            <i class="bi bi-moon"></i> <span>Mode Sombre</span>
-        </button>
-        
-        <div class="user-info">
-            Actor: <strong>@{{ session.get('utilisateur') }}</strong>
-            <a href="/deconnexion" class="btn-logout">Sign out</a>
-        </div>
+        <div class="counter-box"><i class="bi bi-database"></i><span><strong>{{ total_mots }}</strong> mots indexés</span></div>
+        <a href="/" class="{% if page == 'index' %}active{% endif %}"><i class="bi bi-search"></i> Recherche</a>
+        <a href="/ajouter" class="{% if page == 'ajouter' %}active{% endif %}"><i class="bi bi-plus-circle"></i> Ajout manuel</a>
+        <a href="/importation-masse" class="{% if page == 'import' %}active{% endif %}"><i class="bi bi-lightning-charge"></i> Importation en masse</a>
+        <a href="/liste-mots" class="{% if page == 'liste' %}active{% endif %}"><i class="bi bi-list-task"></i> Liste des mots</a>
+        <button id="theme-toggle" class="theme-btn"><i class="bi bi-moon"></i> <span>Mode Sombre</span></button>
+        <div class="user-info">Actor: <strong>@{{ session.get('utilisateur') }}</strong><a href="/deconnexion" class="btn-logout">Sign out</a></div>
     </div>
-
-    {% endif %}
     <div class="content"><div class="container">
         {% block content %}{% endblock %}
     </div></div>
+    {% else %}
+        {% block auth %}{% endblock %}
+    {% endif %}
     <script>
         const toggleBtn = document.getElementById('theme-toggle');
-        if (document.documentElement.getAttribute('data-theme') === 'dark' && toggleBtn) toggleBtn.innerHTML = '☀️ Mode Clair';
+        if (document.documentElement.getAttribute('data-theme') === 'dark' && toggleBtn) { toggleBtn.querySelector('span').innerHTML = 'Mode Clair'; toggleBtn.querySelector('i').className = 'bi bi-sun'; }
         if (toggleBtn) {
             toggleBtn.addEventListener('click', () => {
                 const currentTheme = document.documentElement.getAttribute('data-theme');
                 const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-                toggleBtn.innerHTML = newTheme === 'dark' ? '☀️ Mode Clair' : '🌙 Mode Sombre';
-                document.documentElement.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
+                const icon = toggleBtn.querySelector('i'); const text = toggleBtn.querySelector('span');
+                if (newTheme === 'dark') { text.innerHTML = 'Mode Clair'; icon.className = 'bi bi-sun'; }
+                else { text.innerHTML = 'Mode Sombre'; icon.className = 'bi bi-moon'; }
+                document.documentElement.setAttribute('data-theme', newTheme); localStorage.setItem('theme', newTheme);
             });
         }
     </script>
