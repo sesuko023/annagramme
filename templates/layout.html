@@ -2,237 +2,84 @@
 <html lang="fr" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}{% endblock %} - Anagrammeur</title>
+    <title>Anagram-Repo</title>
     <style>
-        /* 1. DÉFINITION DES THÈMES (Variables CSS) */
         :root {
-            --bg-main: #ffffff;
-            --bg-sidebar: #f6f8fa;
-            --text-main: #1f2328;
-            --border-color: #d0d7de;
-            --bg-badge: #eff1f3;
-            --text-badge: #57606a;
-            --bg-input: #f6f8fa;
-            --bg-box: #ffffff;
+            --bg-main: #ffffff; --bg-sidebar: #f6f8fa; --text-main: #1f2328;
+            --border-color: #d0d7de; --bg-badge: #eff1f3; --text-badge: #57606a;
+            --bg-input: #f6f8fa; --bg-box: #ffffff;
         }
-
         [data-theme="dark"] {
-            --bg-main: #0d1117;        /* Noir GitHub */
-            --bg-sidebar: #161b22;     /* Gris foncé GitHub */
-            --text-main: #e6edf3;      /* Texte clair */
-            --border-color: #30363d;   /* Bordures sombres */
-            --bg-badge: #21262d;
-            --text-badge: #8b949e;
-            --bg-input: #0d1117;
-            --bg-box: #161b22;
+            --bg-main: #0d1117; --bg-sidebar: #161b22; --text-main: #e6edf3;
+            --border-color: #30363d; --bg-badge: #21262d; --text-badge: #8b949e;
+            --bg-input: #0d1117; --bg-box: #161b22;
         }
-
-        /* 2. APPLICATION DES STYLES */
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            display: flex; 
-            height: 100vh; 
-            background: var(--bg-main); 
-            color: var(--text-main);
-            transition: background 0.2s, color 0.2s; /* Transition douce */
+            margin: 0; padding: 0; display: flex; height: 100vh; 
+            background: var(--bg-main); color: var(--text-main); transition: background 0.2s, color 0.2s;
         }
-        
         .sidebar { 
-            width: 260px; 
-            background: var(--bg-sidebar); 
-            display: flex; 
-            flex-direction: column; 
-            padding: 24px 0; 
-            box-sizing: border-box; 
-            border-right: 1px solid var(--border-color);
+            width: 260px; background: var(--bg-sidebar); display: flex; flex-direction: column; 
+            padding: 24px 0; box-sizing: border-box; border-right: 1px solid var(--border-color);
         }
-        .sidebar h2 { 
-            font-size: 1.1em; 
-            font-weight: 600;
-            padding: 0 16px;
-            margin-top: 0;
-            margin-bottom: 20px; 
-        }
+        .sidebar h2 { font-size: 1.1em; font-weight: 600; padding: 0 16px; margin: 0 0 20px 0; }
         .sidebar a { 
-            padding: 8px 16px; 
-            color: var(--text-main); 
-            text-decoration: none; 
-            font-size: 0.95em; 
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-left: 3px solid transparent;
+            padding: 8px 16px; color: var(--text-main); text-decoration: none; font-size: 0.95em; 
+            display: flex; align-items: center; gap: 8px; border-left: 3px solid transparent;
         }
-        .sidebar a:hover { 
-            background: var(--border-color); 
-        }
-        .sidebar a.active { 
-            background: var(--bg-main); 
-            font-weight: 600;
-            border-left-color: #fd8c73; 
-        }
-        
-        /* BOUTON THÈME */
+        .sidebar a:hover { background: var(--border-color); }
+        .sidebar a.active { background: var(--bg-main); font-weight: 600; border-left-color: #fd8c73; }
         .theme-btn {
-            margin: 8px 16px;
-            padding: 6px 12px;
-            background: var(--bg-main);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
+            margin: 8px 16px; padding: 6px 12px; background: var(--bg-main); color: var(--text-main);
+            border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85em;
         }
-
-        .sidebar .counter-box {
-            margin: 0 16px 16px 16px;
-            font-size: 0.85em;
-            background: var(--bg-input);
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-        }
-        .sidebar .user-info { 
-            margin-top: auto; 
-            padding: 16px; 
-            border-top: 1px solid var(--border-color);
-            font-size: 0.85em; 
-        }
-        .sidebar .btn-logout { 
-            display: block; 
-            margin-top: 8px; 
-            background: var(--bg-sidebar); 
-            color: #cf222e; 
-            padding: 4px 12px; 
-            text-decoration: none; 
-            border: 1px solid var(--border-color);
-            border-radius: 6px; 
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .content { 
-            flex: 1; 
-            padding: 32px; 
-            box-sizing: border-box; 
-            overflow-y: auto; 
-        }
-        .container { 
-            max-width: 800px; 
-            padding: 24px; 
-            border: 1px solid var(--border-color);
-            border-radius: 6px; 
-            background: var(--bg-box);
-        }
+        .sidebar .counter-box { margin: 0 16px 16px 16px; font-size: 0.85em; background: var(--bg-input); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); }
+        .sidebar .user-info { margin-top: auto; padding: 16px; border-top: 1px solid var(--border-color); font-size: 0.85em; }
+        .sidebar .btn-logout { display: block; margin-top: 8px; background: var(--bg-sidebar); color: #cf222e; padding: 4px 12px; text-decoration: none; border: 1px solid var(--border-color); border-radius: 6px; text-align: center; font-weight: 600; }
+        .sidebar .btn-logout:hover { background: #cf222e; color: #ffffff; }
+        .content { flex: 1; padding: 32px; box-sizing: border-box; overflow-y: auto; }
+        .container { max-width: 800px; padding: 24px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-box); }
         h1 { font-size: 1.5em; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 20px;}
-
-        input[type="text"], input[type="password"] { 
-            width: 70%; 
-            padding: 6px 12px; 
-            border: 1px solid var(--border-color); 
-            border-radius: 6px; 
-            font-size: 0.9em; 
-            background: var(--bg-input);
-            color: var(--text-main);
-        }
-        input[type="text"]:focus, input[type="password"]:focus {
-            background: var(--bg-main);
-            border-color: #0969da;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(9,105,218,0.3);
-        }
-        input[type="submit"] { 
-            padding: 6px 16px; 
-            background: #1f883d; 
-            color: #ffffff; 
-            border: 1px solid rgba(31,136,61,0.15); 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-size: 0.9em; 
-            font-weight: 600; 
-        }
-        
+        input[type="text"], input[type="password"], textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9em; background: var(--bg-input); color: var(--text-main); box-sizing: border-box; margin-bottom: 15px; }
+        textarea { resize: vertical; font-family: monospace; }
+        input[type="submit"] { padding: 6px 16px; background: #1f883d; color: #ffffff; border: 1px solid rgba(31,136,61,0.15); border-radius: 6px; cursor: pointer; font-size: 0.9em; font-weight: 600; }
+        input[type="submit"]:hover { background: #1a7f37; }
         .message { color: #1a7f37; font-size: 0.9em; padding: 12px 16px; background: #dafbe1; border: 1px solid #4ac26b; border-radius: 6px; margin-bottom: 16px;}
         .error { color: #cf222e; font-size: 0.9em; padding: 12px 16px; background: #ffebe9; border: 1px solid #ff8181; border-radius: 6px; margin-bottom: 16px;}
-        
         ul { padding: 0; margin: 16px 0; list-style: none; border: 1px solid var(--border-color); border-radius: 6px;}
-        li { padding: 12px 16px; font-size: 0.95em; border-bottom: 1px solid var(--border-color); background: var(--bg-box);}
-        li:last-child { border-bottom: none; }
-        
-        .badge {
-            background: var(--bg-badge);
-            color: var(--text-badge);
-            font-size: 0.8em;
-            padding: 2px 8px;
-            border-radius: 2em;
-            border: 1px solid var(--border-color);
-            font-family: monospace;
-            margin-left: 8px;
-        }
+        li { padding: 12px 16px; font-size: 0.95em; border-bottom: 1px solid var(--border-color); background: var(--bg-box); display: flex; justify-content: space-between;}
+        .badge { background: var(--bg-badge); color: var(--text-badge); font-size: 0.8em; padding: 2px 8px; border-radius: 2em; border: 1px solid var(--border-color); font-family: monospace; }
     </style>
-    
-    <!-- 3. SCRIPT ANTI-FLASH (Évite l'écran blanc au chargement si on est en mode sombre) -->
     <script>
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');
     </script>
 </head>
 <body>
     {% if session.get('utilisateur') %}
     <div class="sidebar">
         <h2>📁 Anagram-Repo</h2>
-        
-        <div class="counter-box">
-            📦 <strong>{{ total_mots }}</strong> mot(s) indexé(s)
-        </div>
-
+        <div class="counter-box">📦 <strong>{{ total_mots }}</strong> mots indexés</div>
         <a href="/" class="{% if request.endpoint == 'index' or request.endpoint == 'rechercher' %}active{% endif %}">🔎 Code Query</a>
-        <a href="/ajouter-mot" class="{% if request.endpoint == 'ajouter_mot' %}active{% endif %}">📥 Push un mot</a>
-        <a href="/liste-mots" class="{% if request.endpoint == 'liste_mots' %}active{% endif %}">📋 Main Database</a>
-        
-        <!-- Le bouton magique de bascule -->
+        <a href="/ajouter" class="{% if request.endpoint == 'ajouter' %}active{% endif %}">📥 Push un mot</a>
+        <a href="/importation-masse" class="{% if request.endpoint == 'importation_masse' %}active{% endif %}">⚡ Bulk Import</a>
         <button id="theme-toggle" class="theme-btn">🌙 Mode Sombre</button>
-        
-        <div class="user-info">
-            Actor: <strong>@{{ session['utilisateur'] }}</strong><br>
-            <a href="/deconnexion" class="btn-logout">Sign out</a>
-        </div>
+        <div class="user-info">Actor: <strong>@{{ session.get('utilisateur') }}</strong><a href="/deconnexion" class="btn-logout">Sign out</a></div>
     </div>
     {% endif %}
-    <div class="content">
+    <div class="content"><div class="container">
         {% block content %}{% endblock %}
-    </div>
-
-    <!-- 4. LOGIQUE DU BOUTON (JavaScript) -->
+    </div></div>
     <script>
         const toggleBtn = document.getElementById('theme-toggle');
-        
-        // Met à jour le texte du bouton au démarrage
-        if (document.documentElement.getAttribute('data-theme') === 'dark' && toggleBtn) {
-            toggleBtn.innerHTML = '☀️ Mode Clair';
-        }
-
+        if (document.documentElement.getAttribute('data-theme') === 'dark' && toggleBtn) toggleBtn.innerHTML = '☀️ Mode Clair';
         if (toggleBtn) {
             toggleBtn.addEventListener('click', () => {
                 const currentTheme = document.documentElement.getAttribute('data-theme');
-                let newTheme = 'light';
-                
-                if (currentTheme === 'light') {
-                    newTheme = 'dark';
-                    toggleBtn.innerHTML = '☀️ Mode Clair';
-                } else {
-                    toggleBtn.innerHTML = '🌙 Mode Sombre';
-                }
-                
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                toggleBtn.innerHTML = newTheme === 'dark' ? '☀️ Mode Clair' : '🌙 Mode Sombre';
                 document.documentElement.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme); // Sauvegarde dans le navigateur
+                localStorage.setItem('theme', newTheme);
             });
         }
     </script>
