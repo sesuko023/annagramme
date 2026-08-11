@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-<h1>🔎 Code Query (Recherche)</h1>
+<h1><i class="bi bi-search"></i> Recherche</h1>
 <form method="GET" action="/rechercher">
     <input type="text" name="lettres" placeholder="Entrez vos lettres (ex: ehcin)" value="{{ tirage or '' }}" required style="width:75%; margin-right:10px;">
     <input type="submit" value="Search">
