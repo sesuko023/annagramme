@@ -3,24 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <title>Anagram-Repo</title>
-    <link rel="stylesheet" href="https://cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
-
+    <!-- Chargement officiel des Nerd Fonts pour le Web -->
+    <link rel="stylesheet" href="https://nerdfonts.com">
     <style>
         :root { --bg-main: #ffffff; --bg-sidebar: #f6f8fa; --text-main: #1f2328; --border-color: #d0d7de; --bg-badge: #eff1f3; --text-badge: #57606a; --bg-input: #f6f8fa; --bg-box: #ffffff; }
         [data-theme="dark"] { --bg-main: #0d1117; --bg-sidebar: #161b22; --text-main: #e6edf3; --border-color: #30363d; --bg-badge: #21262d; --text-badge: #8b949e; --bg-input: #0d1117; --bg-box: #161b22; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; margin: 0; padding: 0; display: flex; height: 100vh; background: var(--bg-main); color: var(--text-main); transition: background 0.2s; }
         .sidebar { width: 260px; background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 24px 0; box-sizing: border-box; border-right: 1px solid var(--border-color); }
-        .sidebar h2 { font-size: 1.1em; font-weight: 600; padding: 0 16px; margin: 0 0 20px 0; display: flex; align-items: center; gap: 8px; }
-        .sidebar a { padding: 8px 16px; color: var(--text-main); text-decoration: none; font-size: 0.95em; display: flex; align-items: center; gap: 10px; border-left: 3px solid transparent; }
-        .sidebar a i { font-size: 1.1em; color: var(--text-badge); }
+        .sidebar h2 { font-size: 1.1em; font-weight: 600; padding: 0 16px; margin: 0 0 20px 0; display: flex; align-items: center; gap: 10px; }
+        .sidebar a { padding: 8px 16px; color: var(--text-main); text-decoration: none; font-size: 0.95em; display: flex; align-items: center; gap: 12px; border-left: 3px solid transparent; }
+        /* Style des icônes Nerd Font textuelles */
+        .sidebar a i, h1 i { font-family: "Nerd Font Complete", monospace; font-style: normal; font-size: 1.2em; color: var(--text-badge); }
         .sidebar a:hover { background: var(--border-color); }
         .sidebar a.active { background: var(--bg-main); font-weight: 600; border-left-color: #fd8c73; }
         .sidebar a.active i { color: var(--text-main); }
         .theme-btn { margin: 8px 16px; padding: 6px 12px; background: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85em; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .theme-btn i { font-family: "Nerd Font Complete", monospace; font-style: normal; }
         .sidebar .counter-box { margin: 0 16px 16px 16px; font-size: 0.85em; background: var(--bg-input); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px; }
+        .sidebar .counter-box i { font-family: "Nerd Font Complete", monospace; font-style: normal; }
         .sidebar .user-info { margin-top: auto; padding: 16px; border-top: 1px solid var(--border-color); font-size: 0.85em; }
         .sidebar .btn-logout { display: block; margin-top: 8px; background: var(--bg-sidebar); color: #cf222e; padding: 4px 12px; text-decoration: none; border: 1px solid var(--border-color); border-radius: 6px; text-align: center; font-weight: 600; }
-        .sidebar .btn-logout:hover { background: #cf222e; color: #ffffff; }
         .content { flex: 1; padding: 32px; box-sizing: border-box; overflow-y: auto; display: flex; justify-content: center; align-items: flex-start; }
         .container { width: 100%; max-width: 800px; padding: 24px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-box); }
         h1 { font-size: 1.5em; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
@@ -38,13 +40,15 @@
 <body>
     {% if session.get('utilisateur') %}
     <div class="sidebar">
-        <h2><i class="bi bi-terminal"></i> Anagrammeur</h2>
-        <div class="counter-box"><i class="bi bi-database"></i><span><strong>{{ total_mots }}</strong> mots indexés</span></div>
-        <a href="/" class="{% if page == 'index' %}active{% endif %}"><i class="bi bi-search"></i> Recherche</a>
-        <a href="/ajouter" class="{% if page == 'ajouter' %}active{% endif %}"><i class="bi bi-plus-circle"></i> Ajout manuel</a>
-        <a href="/importation-masse" class="{% if page == 'import' %}active{% endif %}"><i class="bi bi-lightning-charge"></i> Importation en masse</a>
-        <a href="/liste-mots" class="{% if page == 'liste' %}active{% endif %}"><i class="bi bi-list-task"></i> Liste des mots</a>
-        <button id="theme-toggle" class="theme-btn"><i class="bi bi-moon"></i> <span>Mode Sombre</span></button>
+        <h2><i class="nf nf-custom_folder_open"></i> Anagrammeur</h2>
+        <div class="counter-box"><i class="nf nf-fa-database"></i><span><strong>{{ total_mots }}</strong> mots indexés</span></div>
+        
+        <a href="/" class="{% if page == 'index' %}active{% endif %}"><i class="nf nf-fa-search"></i> Recherche</a>
+        <a href="/ajouter" class="{% if page == 'ajouter' %}active{% endif %}"><i class="nf nf-fa-plus_circle"></i> Ajout manuel</a>
+        <a href="/importation-masse" class="{% if page == 'import' %}active{% endif %}"><i class="nf nf-fa-bolt"></i> Importation en masse</a>
+        <a href="/liste-mots" class="{% if page == 'liste' %}active{% endif %}"><i class="nf nf-fa-list"></i> Liste des mots</a>
+        
+        <button id="theme-toggle" class="theme-btn"><i class="nf nf-fa-moon_o"></i> <span>Mode Sombre</span></button>
         <div class="user-info">Actor: <strong>@{{ session.get('utilisateur') }}</strong><a href="/deconnexion" class="btn-logout">Sign out</a></div>
     </div>
     <div class="content"><div class="container">
@@ -55,14 +59,17 @@
     {% endif %}
     <script>
         const toggleBtn = document.getElementById('theme-toggle');
-        if (document.documentElement.getAttribute('data-theme') === 'dark' && toggleBtn) { toggleBtn.querySelector('span').innerHTML = 'Mode Clair'; toggleBtn.querySelector('i').className = 'bi bi-sun'; }
+        if (document.documentElement.getAttribute('data-theme') === 'dark' && toggleBtn) { 
+            toggleBtn.querySelector('span').innerHTML = 'Mode Clair'; 
+            toggleBtn.querySelector('i').className = 'nf nf-fa-sun_o';
+        }
         if (toggleBtn) {
             toggleBtn.addEventListener('click', () => {
                 const currentTheme = document.documentElement.getAttribute('data-theme');
                 const newTheme = currentTheme === 'light' ? 'dark' : 'light';
                 const icon = toggleBtn.querySelector('i'); const text = toggleBtn.querySelector('span');
-                if (newTheme === 'dark') { text.innerHTML = 'Mode Clair'; icon.className = 'bi bi-sun'; }
-                else { text.innerHTML = 'Mode Sombre'; icon.className = 'bi bi-moon'; }
+                if (newTheme === 'dark') { text.innerHTML = 'Mode Clair'; icon.className = 'nf nf-fa-sun_o'; }
+                else { text.innerHTML = 'Mode Sombre'; icon.className = 'nf nf-fa-moon_o'; }
                 document.documentElement.setAttribute('data-theme', newTheme); localStorage.setItem('theme', newTheme);
             });
         }
