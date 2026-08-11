@@ -73,17 +73,16 @@ HTML_IMPORT = """{% extends "layout.html" %}{% block content %}
 
 HTML_LISTE = """{% extends "layout.html" %}{% block content %}
 <h1>📋 Main Database (Tous les mots)</h1>
-<p style="font-size: 0.9em; color: var(--text-badge);">Voici la liste complète des mots actuellement enregistrés dans votre dictionnaire cloud.</p>
+<p style="font-size: 0.9em; color: var(--text-badge);">Liste complète des mots dans votre dictionnaire cloud.</p>
 {% if mots %}
     <ul>
     {% for row in mots %}
         <li><strong>{{ row[0] }}</strong> <span class="badge">Signature : {{ row[1] }}</span></li>
     {% endfor %}
     </ul>
-{% else %}
-    <p>La base de données est actuellement vide.</p>
-{% endif %}
+{% else %}<p>La base de données est vide.</p>{% endif %}
 {% endblock %}"""
+
 
 
 PAGE_AUTH = """<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Connexion</title>
@@ -159,6 +158,18 @@ def importation_masse():
             conn.close()
             msg = f'<div class="message">🚀 {mots_ajoutes} mots ajoutés !</div>'
     return render_template_string(HTML_IMPORT, total_mots=compter_mots(), msg=msg)
+
+@app.route('/liste-mots')
+def liste_mots():
+    if 'utilisateur' not in session: return redirect(url_for('connexion'))
+    conn = psycopg.connect(DATABASE_URL)
+    cur = conn.cursor()
+    cur.execute("SELECT mot, signature FROM anagrammes ORDER BY mot ASC;")
+    mots = cur.fetchall()
+    cur.close()
+    conn.close()
+    return render_template_string(HTML_LISTE, total_mots=compter_mots(), mots=mots)
+
 
 @app.route('/connexion', methods=['GET', 'POST'])
 def connexion():
