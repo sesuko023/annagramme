@@ -71,6 +71,21 @@ HTML_IMPORT = """{% extends "layout.html" %}{% block content %}
 </form>
 {% endblock %}"""
 
+HTML_LISTE = """{% extends "layout.html" %}{% block content %}
+<h1>📋 Main Database (Tous les mots)</h1>
+<p style="font-size: 0.9em; color: var(--text-badge);">Voici la liste complète des mots actuellement enregistrés dans votre dictionnaire cloud.</p>
+{% if mots %}
+    <ul>
+    {% for row in mots %}
+        <li><strong>{{ row[0] }}</strong> <span class="badge">Signature : {{ row[1] }}</span></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>La base de données est actuellement vide.</p>
+{% endif %}
+{% endblock %}"""
+
+
 PAGE_AUTH = """<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Connexion</title>
 <style>
     body { font-family: Arial, sans-serif; background: #f6f8fa; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
