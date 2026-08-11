@@ -129,9 +129,9 @@ def importation_masse():
             apres = compter_mots()
             mots_ajoutes = apres - avant
             
-            msg = f"🚀 Importation réussie ! {mots_ajoutes} nouveaux mots ont été ajoutés à la base."
+            msg = f'<i class="fa-solid fa-circle-check"></i> Importation réussie ! {mots_ajoutes} nouveaux mots ont été ajoutés à la base.'
         else:
-            msg = "⚠️ Aucun mot trouvé. Veuillez sélectionner un fichier ou écrire du texte."
+            msg = '<i class="fa-solid fa-circle-exclamation"></i> Aucun mot trouvé. Veuillez sélectionner un fichier ou écrire du texte.'
             
     return render_template("import.html", total_mots=compter_mots(), bulk_msg=msg, page="import")
 
