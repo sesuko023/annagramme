@@ -104,10 +104,10 @@ def importation_masse():
         if 'fichier_mots' in request.files:
             fichier = request.files['fichier_mots']
             if fichier and fichier.filename.endswith('.txt'):
-                # Lit le fichier et le transforme en texte lisible (chaîne de caractères)
+                # Lit le fichier et le transforme en texte lisible
                 texte_brut = fichier.read().decode('utf-8', errors='ignore')
         
-        # 2. Si aucun fichier, regarde si du texte a été collé dans la zone de texte
+        # 2. Si aucun fichier, regarde la zone de texte (CORRIGÉ ICI : 'texte_brut' avec un 'e')
         if not texte_brut:
             texte_brut = request.form.get('liste_mots', '')
             
