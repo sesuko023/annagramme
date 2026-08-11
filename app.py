@@ -80,6 +80,8 @@ def ajouter():
     return render_template("ajouter.html", total_mots=compter_mots(), msg=msg, err=err, page="ajouter")
 
 @app.route('/importation-masse', methods=['GET', 'POST'])
+
+@app.route('/importation-masse', methods=['GET', 'POST'])
 def importation_masse():
     if 'utilisateur' not in session: return redirect(url_for('connexion'))
     msg = ""
@@ -98,10 +100,12 @@ def importation_masse():
         mots_bruts = texte_brut.replace(',', ' ').split()
         
         if mots_bruts:
+            # 1. On stocke le nombre de mots AVANT l'importation (vrai entier)
+            avant = compter_mots()
+            
             conn = psycopg.connect(DATABASE_URL)
             cur = conn.cursor()
             
-            # Préparation du bloc de données groupées
             tuples_mots = []
             mots_vus = set()
             for m in mots_bruts:
@@ -111,7 +115,6 @@ def importation_masse():
                     sig = generer_signature(mot_propre)
                     tuples_mots.append((sig, mot_propre))
             
-            # ENVOI EN MASSE OPTIMISÉ : 1 seule requête réseau pour tout le fichier !
             if tuples_mots:
                 cur.executemany(
                     "INSERT INTO anagrammes (signature, mot) VALUES (%s, %s) ON CONFLICT (mot) DO NOTHING",
@@ -121,11 +124,17 @@ def importation_masse():
             conn.commit()
             cur.close()
             conn.close()
-            msg = f"🚀 Traitement en masse terminé avec succès !"
+            
+            # 2. On calcule la différence avec le nombre APRES l'importation
+            apres = compter_mots()
+            mots_ajoutes = apres - avant
+            
+            msg = f"🚀 Importation réussie ! {mots_ajoutes} nouveaux mots ont été ajoutés à la base."
         else:
             msg = "⚠️ Aucun mot trouvé. Veuillez sélectionner un fichier ou écrire du texte."
             
     return render_template("import.html", total_mots=compter_mots(), bulk_msg=msg, page="import")
+
 
 @app.route('/liste-mots')
 def liste_mots():
