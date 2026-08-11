@@ -19,7 +19,7 @@ def initialiser_bdd():
 
 def nettoyer_mot(texte):
     """Met en majuscules et supprime tous les accents (ex: niché -> NICHE)."""
-    if not texte: return ""  # CORRIGÉ : 'texte' avec un 'e'
+    if not texte: return ""
     texte_normalise = unicodedata.normalize('NFD', texte.strip())
     texte_sans_accent = "".join(c for c in texte_normalise if unicodedata.category(c) != 'Mn')
     return "".join(c for c in texte_sans_accent if c.isalpha()).upper()
@@ -28,14 +28,15 @@ def generer_signature(mot_propre):
     return "".join(sorted(mot_propre))
 
 def compter_mots():
+    """Compte le nombre de mots de manière sécurisée."""
     try:
         conn = psycopg.connect(DATABASE_URL)
         cur = conn.cursor()
         cur.execute("SELECT COUNT(*) FROM anagrammes;")
-        total = cur.fetchone()[0]  # CORRIGÉ : extrait le chiffre exact du paquet
+        resultat = cur.fetchone()
         cur.close()
         conn.close()
-        return total
+        return resultat[0] if resultat else 0
     except Exception: return 0
 
 @app.route('/')
@@ -49,29 +50,14 @@ def rechercher():
     lettres = request.args.get('lettres', '').strip()
     lettres_propres = nettoyer_mot(lettres)
     sig = generer_signature(lettres_propres)
+    
     conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("SELECT mot FROM anagrammes WHERE signature = %s ORDER BY mot ASC", (sig,))
-    resultats = [row[0] for row in cur.fetchall()]  # CORRIGÉ : extrait le mot proprement
+    resultats = [row[0] for row in cur.fetchall()]
     cur.close()
     conn.close()
     return render_template("index.html", total_mots=compter_mots(), resultats=resultats, tirage=lettres, sig=sig, page="index")
-
-@app.route('/vider-base', methods=['POST'])
-def vider_base():
-    if 'utilisateur' not in session: return redirect(url_for('connexion'))
-    try:
-        conn = psycopg.connect(DATABASE_URL)
-        cur = conn.cursor()
-        # Supprime instantanément l'INTEGRALITE des lignes de la table
-        cur.execute("TRUNCATE TABLE anagrammes;")
-        conn.commit()
-        cur.close()
-        conn.close()
-    except Exception:
-        pass
-    return redirect(url_for('liste_mots'))
-
 
 @app.route('/ajouter', methods=['GET', 'POST'])
 def ajouter():
@@ -81,15 +67,19 @@ def ajouter():
         mot_brut = request.form.get('nouveau_mot', '')
         mot_propre = nettoyer_mot(mot_brut)
         if mot_propre:
-            sig = generer_signature(mot_propre)
+            sig = generer_signature(mot_propre) # CORRIGÉ : signature bien définie ici
+            avant = compter_mots()
             try:
                 conn = psycopg.connect(DATABASE_URL)
                 cur = conn.cursor()
                 cur.execute("INSERT INTO anagrammes (signature, mot) VALUES (%s, %s) ON CONFLICT (mot) DO NOTHING", (sig, mot_propre))
                 conn.commit()
-                msg = f'✔️ Mot "{mot_propre}" indexé !' if cur.rowcount > 0 else f'⚠️ Le mot "{mot_propre}" existe déjà.'
                 cur.close()
                 conn.close()
+                
+                apres = compter_mots()
+                if apres > avant: msg = f'✔️ Mot "{mot_propre}" indexé !'
+                else: err = f'⚠️ Le mot "{mot_propre}" existe déjà.'
             except Exception: err = "Erreur d'écriture."
     return render_template("ajouter.html", total_mots=compter_mots(), msg=msg, err=err, page="ajouter")
 
@@ -100,22 +90,20 @@ def importation_masse():
     if request.method == 'POST':
         texte_brut = ""
         
-        # 1. On vérifie si un fichier a RÉELLEMENT été choisi par l'utilisateur
         if 'fichier_mots' in request.files:
             fichier = request.files['fichier_mots']
             if fichier and fichier.filename != '':
                 if fichier.filename.endswith('.txt'):
                     texte_brut = fichier.read().decode('utf-8', errors='ignore')
         
-        # 2. Si aucun fichier n'a été fourni, on récupère le copier-coller
         if not texte_brut:
             texte_brut = request.form.get('liste_mots', '').strip()
             
-        # 3. Traitement et injection dans Supabase
         mots_bruts = texte_brut.replace(',', ' ').split()
-        mots_ajoutes = 0
         
         if mots_bruts:
+            avant = compter_mots()
+            
             conn = psycopg.connect(DATABASE_URL)
             cur = conn.cursor()
             for m in mots_bruts:
@@ -123,11 +111,13 @@ def importation_masse():
                 if mot_propre:
                     sig = generer_signature(mot_propre)
                     cur.execute("INSERT INTO anagrammes (signature, mot) VALUES (%s, %s) ON CONFLICT (mot) DO NOTHING", (sig, mot_propre))
-                    if cur.rowcount > 0: mots_ajoutes += 1
             conn.commit()
             cur.close()
             conn.close()
-            msg = f"🚀 {mots_ajoutes} mots ajoutés avec succès !"
+            
+            apres = compter_mots()
+            mots_ajoutes = apres - avant
+            msg = f"🚀 {mots_ajoutes} mots uniques ont été ajoutés avec succès !"
         else:
             msg = "⚠️ Aucun mot trouvé. Veuillez sélectionner un fichier ou écrire du texte."
             
@@ -139,7 +129,7 @@ def liste_mots():
     conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("SELECT mot FROM anagrammes ORDER BY mot ASC;")
-    mots = [row[0] for row in cur.fetchall()]  # CORRIGÉ : extrait le mot proprement
+    mots = [row[0] for row in cur.fetchall()]
     cur.close()
     conn.close()
     return render_template("liste.html", total_mots=compter_mots(), mots=mots, page="liste")
@@ -157,6 +147,19 @@ def supprimer_mot():
         conn.close()
     return redirect(url_for('liste_mots'))
 
+@app.route('/vider-base', methods=['POST'])
+def vider_base():
+    if 'utilisateur' not in session: return redirect(url_for('connexion'))
+    try:
+        conn = psycopg.connect(DATABASE_URL)
+        cur = conn.cursor()
+        cur.execute("TRUNCATE TABLE anagrammes;")
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception: pass
+    return redirect(url_for('liste_mots'))
+
 @app.route('/connexion', methods=['GET', 'POST'])
 def connexion():
     erreur = None
@@ -169,7 +172,7 @@ def connexion():
         compte = cur.fetchone()
         cur.close()
         conn.close()
-        if compte and check_password_hash(compte[0], mot_de_passe):  # CORRIGÉ : extrait le mot de passe
+        if compte and check_password_hash(compte[0], mot_de_passe):
             session['utilisateur'] = identifiant
             return redirect(url_for('index'))
         erreur = "Identifiant ou mot de passe incorrect."
