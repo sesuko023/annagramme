@@ -73,13 +73,18 @@ def ajouter():
                 cur = conn.cursor()
                 cur.execute("INSERT INTO anagrammes (signature, mot) VALUES (%s, %s) ON CONFLICT (mot) DO NOTHING", (sig, mot_propre))
                 conn.commit()
-                msg = f'✔️ Mot "{mot_propre}" indexé !'
+                
+                # ICI : Gestion exacte de la réussite ou du doublon
+                if cur.rowcount and cur.rowcount > 0:
+                    msg = f'<i class="fa-solid fa-circle-check"></i> Mot "{mot_propre}" indexé !'
+                else:
+                    err = f'<i class="fa-solid fa-circle-exclamation"></i> Le mot "{mot_propre}" existe déjà.'
+                
                 cur.close()
                 conn.close()
-            except Exception: err = "Erreur d'écriture."
+            except Exception: err = '<i class="fa-solid fa-circle-exclamation"></i> Erreur d\'écriture.'
     return render_template("ajouter.html", total_mots=compter_mots(), msg=msg, err=err, page="ajouter")
 
-@app.route('/importation-masse', methods=['GET', 'POST'])
 
 @app.route('/importation-masse', methods=['GET', 'POST'])
 def importation_masse():
