@@ -1,30 +1,52 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %} - Anagrammeur</title>
     <style>
-        /* Palette de couleurs & polices inspirées de GitHub (Primer UI) */
+        /* 1. DÉFINITION DES THÈMES (Variables CSS) */
+        :root {
+            --bg-main: #ffffff;
+            --bg-sidebar: #f6f8fa;
+            --text-main: #1f2328;
+            --border-color: #d0d7de;
+            --bg-badge: #eff1f3;
+            --text-badge: #57606a;
+            --bg-input: #f6f8fa;
+            --bg-box: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg-main: #0d1117;        /* Noir GitHub */
+            --bg-sidebar: #161b22;     /* Gris foncé GitHub */
+            --text-main: #e6edf3;      /* Texte clair */
+            --border-color: #30363d;   /* Bordures sombres */
+            --bg-badge: #21262d;
+            --text-badge: #8b949e;
+            --bg-input: #0d1117;
+            --bg-box: #161b22;
+        }
+
+        /* 2. APPLICATION DES STYLES */
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; 
             margin: 0; 
             padding: 0; 
             display: flex; 
             height: 100vh; 
-            background: #ffffff; 
-            color: #1f2328;
+            background: var(--bg-main); 
+            color: var(--text-main);
+            transition: background 0.2s, color 0.2s; /* Transition douce */
         }
         
-        /* Menu de navigation à gauche */
         .sidebar { 
             width: 260px; 
-            background: #f6f8fa; 
-            color: #1f2328; 
+            background: var(--bg-sidebar); 
             display: flex; 
             flex-direction: column; 
             padding: 24px 0; 
             box-sizing: border-box; 
-            border-right: 1px solid #d0d7de;
+            border-right: 1px solid var(--border-color);
         }
         .sidebar h2 { 
             font-size: 1.1em; 
@@ -32,112 +54,103 @@
             padding: 0 16px;
             margin-top: 0;
             margin-bottom: 20px; 
-            color: #1f2328; 
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
         .sidebar a { 
             padding: 8px 16px; 
-            color: #1f2328; 
+            color: var(--text-main); 
             text-decoration: none; 
             font-size: 0.95em; 
-            transition: 0.1s; 
             display: flex;
             align-items: center;
             gap: 8px;
             border-left: 3px solid transparent;
         }
         .sidebar a:hover { 
-            background: #eaeef2; 
+            background: var(--border-color); 
         }
         .sidebar a.active { 
-            background: #ffffff; 
+            background: var(--bg-main); 
             font-weight: 600;
-            border-left-color: #fd8c73; /* Couleur orange d'accentuation GitHub (comme les onglets de dépôts) */
+            border-left-color: #fd8c73; 
         }
+        
+        /* BOUTON THÈME */
+        .theme-btn {
+            margin: 8px 16px;
+            padding: 6px 12px;
+            background: var(--bg-main);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
         .sidebar .counter-box {
             margin: 0 16px 16px 16px;
             font-size: 0.85em;
-            background: #eff1f3;
+            background: var(--bg-input);
             padding: 6px 12px;
             border-radius: 6px;
-            border: 1px solid #d0d7de;
-            color: #65717c;
+            border: 1px solid var(--border-color);
         }
         .sidebar .user-info { 
             margin-top: auto; 
             padding: 16px; 
-            background: #f6f8fa; 
-            border-top: 1px solid #d0d7de;
+            border-top: 1px solid var(--border-color);
             font-size: 0.85em; 
-            color: #636c76;
         }
         .sidebar .btn-logout { 
             display: block; 
             margin-top: 8px; 
-            background: #f6f8fa; 
+            background: var(--bg-sidebar); 
             color: #cf222e; 
             padding: 4px 12px; 
             text-decoration: none; 
-            border: 1px solid #d0d7de;
+            border: 1px solid var(--border-color);
             border-radius: 6px; 
             text-align: center;
             font-weight: 600;
         }
-        .sidebar .btn-logout:hover {
-            background: #cf222e;
-            color: #ffffff;
-            border-color: #cf222e;
-        }
 
-        /* Conteneur principal à droite */
         .content { 
             flex: 1; 
             padding: 32px; 
             box-sizing: border-box; 
             overflow-y: auto; 
-            background: #ffffff;
         }
         .container { 
             max-width: 800px; 
-            background: #ffffff; 
             padding: 24px; 
-            border: 1px solid #d0d7de;
+            border: 1px solid var(--border-color);
             border-radius: 6px; 
+            background: var(--bg-box);
         }
-        h1, h2, h3 { 
-            font-weight: 600;
-            color: #1f2328; 
-            margin-top: 0; 
-        }
-        h1 { font-size: 1.5em; border-bottom: 1px solid #d0d7de; padding-bottom: 8px; margin-bottom: 20px;}
-        h2 { font-size: 1.25em; }
+        h1 { font-size: 1.5em; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 20px;}
 
-        /* Éléments de formulaires GitHub */
         input[type="text"], input[type="password"] { 
             width: 70%; 
             padding: 6px 12px; 
-            border: 1px solid #d0d7de; 
+            border: 1px solid var(--border-color); 
             border-radius: 6px; 
             font-size: 0.9em; 
-            background: #f6f8fa;
-            color: #1f2328;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
+            background: var(--bg-input);
+            color: var(--text-main);
         }
         input[type="text"]:focus, input[type="password"]:focus {
-            background: #ffffff;
+            background: var(--bg-main);
             border-color: #0969da;
             outline: none;
             box-shadow: 0 0 0 3px rgba(9,105,218,0.3);
         }
-        .auth-box input[type="text"], .auth-box input[type="password"] { 
-            width: 100%; 
-            margin-bottom: 12px;
-        }
         input[type="submit"] { 
             padding: 6px 16px; 
-            background: #1f883d; /* Vert de validation GitHub */
+            background: #1f883d; 
             color: #ffffff; 
             border: 1px solid rgba(31,136,61,0.15); 
             border-radius: 6px; 
@@ -145,64 +158,31 @@
             font-size: 0.9em; 
             font-weight: 600; 
         }
-        input[type="submit"]:hover { 
-            background: #1a7f37; 
-        }
         
-        /* Alertes et notifications */
-        .message { 
-            color: #1a7f37; 
-            font-size: 0.9em;
-            font-weight: 500; 
-            padding: 12px 16px; 
-            background: #dafbe1; 
-            border: 1px solid #4ac26b;
-            border-radius: 6px; 
-            margin-bottom: 16px;
-        }
-        .error { 
-            color: #cf222e; 
-            font-size: 0.9em;
-            font-weight: 500; 
-            padding: 12px 16px; 
-            background: #ffebe9; 
-            border: 1px solid #ff8181;
-            border-radius: 6px; 
-            margin-bottom: 16px;
-        }
+        .message { color: #1a7f37; font-size: 0.9em; padding: 12px 16px; background: #dafbe1; border: 1px solid #4ac26b; border-radius: 6px; margin-bottom: 16px;}
+        .error { color: #cf222e; font-size: 0.9em; padding: 12px 16px; background: #ffebe9; border: 1px solid #ff8181; border-radius: 6px; margin-bottom: 16px;}
         
-        /* Listes de mots typées GitHub */
-        ul { 
-            padding: 0; 
-            margin: 16px 0;
-            list-style: none;
-            border: 1px solid #d0d7de;
-            border-radius: 6px;
-        }
-        li { 
-            padding: 12px 16px; 
-            font-size: 0.95em; 
-            color: #1f2328; 
-            border-bottom: 1px solid #d0d7de;
-            background: #ffffff;
-        }
-        li:last-child {
-            border-bottom: none;
-        }
+        ul { padding: 0; margin: 16px 0; list-style: none; border: 1px solid var(--border-color); border-radius: 6px;}
+        li { padding: 12px 16px; font-size: 0.95em; border-bottom: 1px solid var(--border-color); background: var(--bg-box);}
+        li:last-child { border-bottom: none; }
         
-        /* Petits badges gris (comme les tags de releases GitHub) */
         .badge {
-            background: #eff1f3;
-            color: #57606a;
+            background: var(--bg-badge);
+            color: var(--text-badge);
             font-size: 0.8em;
             padding: 2px 8px;
             border-radius: 2em;
-            border: 1px solid #d0d7de;
+            border: 1px solid var(--border-color);
             font-family: monospace;
             margin-left: 8px;
         }
-        .auth-container { max-width: 340px; margin: 100px auto; }
     </style>
+    
+    <!-- 3. SCRIPT ANTI-FLASH (Évite l'écran blanc au chargement si on est en mode sombre) -->
+    <script>
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
 </head>
 <body>
     {% if session.get('utilisateur') %}
@@ -217,6 +197,9 @@
         <a href="/ajouter-mot" class="{% if request.endpoint == 'ajouter_mot' %}active{% endif %}">📥 Push un mot</a>
         <a href="/liste-mots" class="{% if request.endpoint == 'liste_mots' %}active{% endif %}">📋 Main Database</a>
         
+        <!-- Le bouton magique de bascule -->
+        <button id="theme-toggle" class="theme-btn">🌙 Mode Sombre</button>
+        
         <div class="user-info">
             Actor: <strong>@{{ session['utilisateur'] }}</strong><br>
             <a href="/deconnexion" class="btn-logout">Sign out</a>
@@ -226,5 +209,32 @@
     <div class="content">
         {% block content %}{% endblock %}
     </div>
+
+    <!-- 4. LOGIQUE DU BOUTON (JavaScript) -->
+    <script>
+        const toggleBtn = document.getElementById('theme-toggle');
+        
+        // Met à jour le texte du bouton au démarrage
+        if (document.documentElement.getAttribute('data-theme') === 'dark' && toggleBtn) {
+            toggleBtn.innerHTML = '☀️ Mode Clair';
+        }
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                let newTheme = 'light';
+                
+                if (currentTheme === 'light') {
+                    newTheme = 'dark';
+                    toggleBtn.innerHTML = '☀️ Mode Clair';
+                } else {
+                    toggleBtn.innerHTML = '🌙 Mode Sombre';
+                }
+                
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme); // Sauvegarde dans le navigateur
+            });
+        }
+    </script>
 </body>
 </html>
