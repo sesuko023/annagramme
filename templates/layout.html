@@ -213,10 +213,17 @@
         <a href="/liste-mots" class="{% if page == 'liste' %}active{% endif %}">
             <i class="bi bi-list-task"></i> Liste des mots
         </a>
-
-        <button id="theme-toggle" class="theme-btn">🌙 Mode Sombre</button>
-        <div class="user-info">Actor: <strong>@{{ session.get('utilisateur') }}</strong><a href="/deconnexion" class="btn-logout">Sign out</a></div>
+        
+        <button id="theme-toggle" class="theme-btn">
+            <i class="bi bi-moon"></i> <span>Mode Sombre</span>
+        </button>
+        
+        <div class="user-info">
+            Actor: <strong>@{{ session.get('utilisateur') }}</strong>
+            <a href="/deconnexion" class="btn-logout">Sign out</a>
+        </div>
     </div>
+
     {% endif %}
     <div class="content"><div class="container">
         {% block content %}{% endblock %}
