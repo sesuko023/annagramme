@@ -7,18 +7,21 @@
     Choisissez une méthode pour importer vos mots. Les doublons seront automatiquement ignorés.
 </p>
 
-<!-- Formulaire mis à jour pour accepter les fichiers -->
 <form method="POST" action="/importation-masse" enctype="multipart/form-data">
     
     <!-- Option A : Charger un fichier .txt -->
     <div style="margin-bottom: 24px; padding: 16px; border: 1px dashed var(--border-color); border-radius: 6px; background: var(--bg-sidebar);">
-        <label style="display: block; font-weight: 600; margin-bottom: 8px;">📁 Option 1 : Charger un fichier texte (.txt)</label>
-        <input type="file" name="fichier_mots" accept=".txt" style="font-size: 0.9em;">
+        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">
+            <i class="fa-solid fa-file-arrow-up" style="color: var(--text-badge); margin-right: 6px;"></i> Option 1 : Charger un fichier texte (.txt)
+        </label>
+        <input type="file" name="fichier_mots" accept=".txt" style="font-size: 0.9em; color: var(--text-main);">
     </div>
 
     <!-- Option B : Copier-coller du texte -->
     <div style="margin-bottom: 20px;">
-        <label style="display: block; font-weight: 600; margin-bottom: 8px;">📝 Option 2 : Ou copiez-collez votre liste de mots ci-dessous</label>
+        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">
+            <i class="fa-solid fa-keyboard" style="color: var(--text-badge); margin-right: 6px;"></i> Option 2 : Ou copiez-collez votre liste de mots ci-dessous
+        </label>
         <p style="font-size: 0.85em; color: var(--text-badge); margin-top: 0;">Séparateurs acceptés : retours à la ligne, espaces ou virgules.</p>
         <textarea name="liste_mots" rows="8" placeholder="CHIEN&#10;NICHE&#10;SOLEIL,ARBRE"></textarea>
     </div>
