@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% block content %}
 <h1><i class="nf nf-fa-plus_circle" style="font-family: 'Nerd Font Complete', monospace; font-style: normal; color: var(--text-badge); margin-right: 10px;"></i> Ajout manuel</h1>
-{% if msg %}<div class="message">{{ msg }}</div>{% endif %}
-{% if err %}<div class="error">{{ err }}</div>{% endif %}
+{% if msg %}<div class="message">{{ msg | safe }}</div>{% endif %}
+{% if err %}<div class="error">{{ err | safe }}</div>{% endif %}
 <form method="POST" action="/ajouter">
     <input type="text" name="nouveau_mot" placeholder="Ex: niche" required style="width:75%; margin-right:10px;">
     <input type="submit" value="Commit Mot">
