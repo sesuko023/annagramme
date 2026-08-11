@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
 <h1><i class="fa-solid fa-bolt"></i> Importation en masse</h1>
-{% if bulk_msg %}<div class="message">{{ bulk_msg }}</div>{% endif %}
+{% if bulk_msg %}<div class="message">{{ bulk_msg | safe }}</div>{% endif %}
 
 <p style="font-size: 0.9em; color: var(--text-badge);">
     Choisissez une méthode pour importer vos mots. Les doublons seront automatiquement ignorés.
