@@ -19,7 +19,7 @@ def initialiser_bdd():
 
 def nettoyer_mot(texte):
     """Met en majuscules et supprime tous les accents (ex: niché -> NICHE)."""
-    if not text: return ""
+    if not texte: return ""
     texte_normalise = unicodedata.normalize('NFD', texte.strip())
     texte_sans_accent = "".join(c for c in texte_normalise if unicodedata.category(c) != 'Mn')
     return "".join(c for c in texte_sans_accent if c.isalpha()).upper()
@@ -53,7 +53,7 @@ def rechercher():
     conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("SELECT mot FROM anagrammes WHERE signature = %s ORDER BY mot ASC", (sig,))
-    # Extraction propre du texte de chaque ligne [row[0]]
+    # CORRECTION : row[0] extrait le mot textuel du paquet
     resultats = [row[0] for row in cur.fetchall()]
     cur.close()
     conn.close()
@@ -108,7 +108,7 @@ def liste_mots():
     conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("SELECT mot FROM anagrammes ORDER BY mot ASC;")
-    # Extraction propre du texte de chaque ligne [row[0]]
+    # CORRECTION : row[0] extrait le mot textuel du paquet
     mots = [row[0] for row in cur.fetchall()]
     cur.close()
     conn.close()
