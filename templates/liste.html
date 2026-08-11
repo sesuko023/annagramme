@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block title %}Liste des mots{% endblock %}
 {% block content %}
-<h1><i class="bi bi-list-task"></i> Main Database (Tous les mots)</h1>
+<h1><i class="nf nf-fa-list" style="font-family: 'Nerd Font Complete', monospace; font-style: normal; color: var(--text-badge); margin-right: 10px;"></i> Liste des mots</h1>
 <p style="font-size: 0.9em; color: var(--text-badge);">Il y a actuellement <strong>{{ mots|length }}</strong> mot(s) enregistré(s) dans la base de données.</p>
 
 {% if mots %}
@@ -11,9 +11,8 @@
             <div style="display: flex; align-items: center;">
                 <form method="POST" action="/supprimer-mot" style="margin-right: 15px; display: inline;" onsubmit="return confirm('Voulez-vous vraiment supprimer le mot {{ item }} ?');">
                     <input type="hidden" name="mot_a_supprimer" value="{{ item }}">
-                    <!-- Remplacement du bouton rouge/émoji par une icône de poubelle fine textuelle -->
                     <button type="submit" style="background: none; border: none; cursor: pointer; padding: 0; color: #cf222e; display: flex; align-items: center;" title="Supprimer ce mot">
-                        <i class="bi bi-trash" style="font-size: 1.1em;"></i>
+                        <i class="nf nf-fa-trash" style="font-family: 'Nerd Font Complete', monospace; font-style: normal; font-size: 1.1em;"></i>
                     </button>
                 </form>
                 <strong>{{ item }}</strong>
