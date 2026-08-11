@@ -19,7 +19,7 @@ def initialiser_bdd():
 
 def nettoyer_mot(texte):
     """Met en majuscules et supprime tous les accents (ex: niché -> NICHE)."""
-    if not texte: return ""
+    if not texte: return ""  # CORRIGÉ : 'texte' avec un 'e'
     texte_normalise = unicodedata.normalize('NFD', texte.strip())
     texte_sans_accent = "".join(c for c in texte_normalise if unicodedata.category(c) != 'Mn')
     return "".join(c for c in texte_sans_accent if c.isalpha()).upper()
@@ -32,7 +32,7 @@ def compter_mots():
         conn = psycopg.connect(DATABASE_URL)
         cur = conn.cursor()
         cur.execute("SELECT COUNT(*) FROM anagrammes;")
-        total = cur.fetchone()[0]
+        total = cur.fetchone()[0]  # CORRIGÉ : extrait le chiffre exact du paquet
         cur.close()
         conn.close()
         return total
@@ -49,12 +49,10 @@ def rechercher():
     lettres = request.args.get('lettres', '').strip()
     lettres_propres = nettoyer_mot(lettres)
     sig = generer_signature(lettres_propres)
-    
     conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("SELECT mot FROM anagrammes WHERE signature = %s ORDER BY mot ASC", (sig,))
-    # CORRECTION : row[0] extrait le mot textuel du paquet
-    resultats = [row[0] for row in cur.fetchall()]
+    resultats = [row[0] for row in cur.fetchall()]  # CORRIGÉ : extrait le mot proprement
     cur.close()
     conn.close()
     return render_template("index.html", total_mots=compter_mots(), resultats=resultats, tirage=lettres, sig=sig, page="index")
@@ -108,8 +106,7 @@ def liste_mots():
     conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("SELECT mot FROM anagrammes ORDER BY mot ASC;")
-    # CORRECTION : row[0] extrait le mot textuel du paquet
-    mots = [row[0] for row in cur.fetchall()]
+    mots = [row[0] for row in cur.fetchall()]  # CORRIGÉ : extrait le mot proprement
     cur.close()
     conn.close()
     return render_template("liste.html", total_mots=compter_mots(), mots=mots, page="liste")
@@ -139,7 +136,7 @@ def connexion():
         compte = cur.fetchone()
         cur.close()
         conn.close()
-        if compte and check_password_hash(compte[0], mot_de_passe):
+        if compte and check_password_hash(compte[0], mot_de_passe):  # CORRIGÉ : extrait le mot de passe
             session['utilisateur'] = identifiant
             return redirect(url_for('index'))
         erreur = "Identifiant ou mot de passe incorrect."
