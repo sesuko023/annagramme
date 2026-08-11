@@ -82,9 +82,23 @@ def importation_masse():
     if 'utilisateur' not in session: return redirect(url_for('connexion'))
     msg = ""
     if request.method == 'POST':
-        texte_brut = request.form.get('liste_mots', '')
+        texte_brut = ""
+        
+        # 1. Vérifie si un fichier a été téléversé
+        if 'fichier_mots' in request.files:
+            fichier = request.files['fichier_mots']
+            if fichier and fichier.filename.endswith('.txt'):
+                # Lit le fichier et le transforme en texte lisible (chaîne de caractères)
+                texte_brut = fichier.read().decode('utf-8', errors='ignore')
+        
+        # 2. Si aucun fichier, regarde si du texte a été collé dans la zone de texte
+        if not texte_brut:
+            texte_brut = request.form.get('liste_mots', '')
+            
+        # 3. Traitement et injection dans Supabase
         mots_bruts = texte_brut.replace(',', ' ').split()
         mots_ajoutes = 0
+        
         if mots_bruts:
             conn = psycopg.connect(DATABASE_URL)
             cur = conn.cursor()
@@ -97,8 +111,10 @@ def importation_masse():
             conn.commit()
             cur.close()
             conn.close()
-            msg = f"🚀 {mots_ajoutes} mots ajoutés !"
+            msg = f"🚀 {mots_ajoutes} mots ajoutés avec succès !"
+            
     return render_template("import.html", total_mots=compter_mots(), bulk_msg=msg, page="import")
+
 
 @app.route('/liste-mots')
 def liste_mots():
