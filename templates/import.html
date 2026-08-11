@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>⚡ Bulk Import (Importation en masse)</h1>
+{% if bulk_msg %}<div class="message">{{ bulk_msg }}</div>{% endif %}
+<p style="font-size: 0.9em; color: var(--text-badge);">Collez votre liste de mots. Séparateurs acceptés : retours à la ligne, espaces ou virgules.</p>
+<form method="POST" action="/importation-masse">
+    <textarea name="liste_mots" rows="12" placeholder="chien&#10;niche&#10;chine" required></textarea>
+    <input type="submit" value="Execute Bulk Load">
+</form>
+{% endblock %}
