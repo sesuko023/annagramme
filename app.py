@@ -28,7 +28,7 @@ def generer_signature(mot_propre):
     return "".join(sorted(mot_propre))
 
 def compter_mots():
-    """Compte le nombre de mots de manière sécurisée."""
+    """Compte le nombre de mots de manière sécurisée en extrayant le chiffre."""
     try:
         conn = psycopg.connect(DATABASE_URL)
         cur = conn.cursor()
@@ -36,7 +36,7 @@ def compter_mots():
         resultat = cur.fetchone()
         cur.close()
         conn.close()
-        return resultat[0] if resultat else 0
+        return resultat[0] if resultat else 0  # CORRIGÉ : On extrait le chiffre [0]
     except Exception: return 0
 
 @app.route('/')
@@ -54,7 +54,7 @@ def rechercher():
     conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("SELECT mot FROM anagrammes WHERE signature = %s ORDER BY mot ASC", (sig,))
-    resultats = [row[0] for row in cur.fetchall()]
+    resultats = [row[0] for row in cur.fetchall()]  # CORRIGÉ : Extrait le texte pur du tuple
     cur.close()
     conn.close()
     return render_template("index.html", total_mots=compter_mots(), resultats=resultats, tirage=lettres, sig=sig, page="index")
@@ -67,7 +67,7 @@ def ajouter():
         mot_brut = request.form.get('nouveau_mot', '')
         mot_propre = nettoyer_mot(mot_brut)
         if mot_propre:
-            sig = generer_signature(mot_propre) # CORRIGÉ : signature bien définie ici
+            sig = generer_signature(mot_propre)
             avant = compter_mots()
             try:
                 conn = psycopg.connect(DATABASE_URL)
@@ -116,7 +116,7 @@ def importation_masse():
             conn.close()
             
             apres = compter_mots()
-            mots_ajoutes = apres - avant
+            mots_ajoutes = apres - avant  # FONCTIONNE : Soustraction entre deux entiers propres
             msg = f"🚀 {mots_ajoutes} mots uniques ont été ajoutés avec succès !"
         else:
             msg = "⚠️ Aucun mot trouvé. Veuillez sélectionner un fichier ou écrire du texte."
@@ -129,7 +129,7 @@ def liste_mots():
     conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("SELECT mot FROM anagrammes ORDER BY mot ASC;")
-    mots = [row[0] for row in cur.fetchall()]
+    mots = [row[0] for row in cur.fetchall()]  # CORRIGÉ : Extrait le texte pur du tuple
     cur.close()
     conn.close()
     return render_template("liste.html", total_mots=compter_mots(), mots=mots, page="liste")
@@ -172,7 +172,7 @@ def connexion():
         compte = cur.fetchone()
         cur.close()
         conn.close()
-        if compte and check_password_hash(compte[0], mot_de_passe):
+        if compte and check_password_hash(compte[0], mot_de_passe):  # CORRIGÉ : Extrait le texte pur du tuple
             session['utilisateur'] = identifiant
             return redirect(url_for('index'))
         erreur = "Identifiant ou mot de passe incorrect."
