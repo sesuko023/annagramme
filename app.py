@@ -43,7 +43,7 @@ def rechercher():
     conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("SELECT mot FROM anagrammes WHERE signature = %s ORDER BY mot ASC", (sig,))
-    resultats = cur.fetchall()
+    resultats = [row[0] for row in cur.fetchall()]
     cur.close()
     conn.close()
     return render_template("index.html", total_mots=compter_mots(), resultats=resultats, tirage=lettres, sig=sig, page="index")
@@ -100,6 +100,19 @@ def liste_mots():
     cur.close()
     conn.close()
     return render_template("liste.html", total_mots=compter_mots(), mots=mots, page="liste")
+
+@app.route('/supprimer-mot', methods=['POST'])
+def supprimer_mot():
+    if 'utilisateur' not in session: return redirect(url_for('connexion'))
+    mot = request.form.get('mot_a_supprimer', '').strip().lower()
+    if mot:
+        conn = psycopg.connect(DATABASE_URL)
+        cur = conn.cursor()
+        cur.execute("DELETE FROM anagrammes WHERE mot = %s", (mot,))
+        conn.commit()
+        cur.close()
+        conn.close()
+    return redirect(url_for('liste_mots'))
 
 @app.route('/connexion', methods=['GET', 'POST'])
 def connexion():
