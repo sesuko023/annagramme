@@ -28,28 +28,25 @@ def compter_mots():
         cur.close()
         conn.close()
         return total
-    except Exception:
-        return 0
+    except Exception: return 0
 
 @app.route('/')
 def index():
     if 'utilisateur' not in session: return redirect(url_for('connexion'))
-    return render_template("layout.html", total_mots=compter_mots(), recherche_active=True)
+    return render_template("index.html", total_mots=compter_mots(), page="index", resultats=None)
 
 @app.route('/rechercher', methods=['GET'])
 def rechercher():
     if 'utilisateur' not in session: return redirect(url_for('connexion'))
     lettres = request.args.get('lettres', '').strip()
     sig = generer_signature(lettres)
-    
     conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
-    cur.execute("SELECT mot FROM anagrammes WHERE signature = %s", (sig,))
-    resultats = [row[0] for row in cur.fetchall()]
+    cur.execute("SELECT mot FROM anagrammes WHERE signature = %s ORDER BY mot ASC", (sig,))
+    resultats = cur.fetchall()
     cur.close()
     conn.close()
-    
-    return render_template("layout.html", total_mots=compter_mots(), resultats=resultats, tirage=lettres, sig=sig, recherche_active=True)
+    return render_template("index.html", total_mots=compter_mots(), resultats=resultats, tirage=lettres, sig=sig, page="index")
 
 @app.route('/ajouter', methods=['GET', 'POST'])
 def ajouter():
@@ -64,12 +61,11 @@ def ajouter():
                 cur = conn.cursor()
                 cur.execute("INSERT INTO anagrammes (signature, mot) VALUES (%s, %s) ON CONFLICT (mot) DO NOTHING", (sig, mot))
                 conn.commit()
-                if cur.rowcount > 0: msg = f'✔️ Mot "{mot}" indexé !'
-                else: err = f'⚠️ Le mot "{mot}" existe déjà.'
+                msg = f'✔️ Mot "{mot}" indexé !' if cur.rowcount > 0 else f'⚠️ Le mot "{mot}" existe déjà.'
                 cur.close()
                 conn.close()
             except Exception: err = "Erreur d'écriture."
-    return render_template("layout.html", total_mots=compter_mots(), msg=msg, err=err, ajout_actif=True)
+    return render_template("ajouter.html", total_mots=compter_mots(), msg=msg, err=err, page="ajouter")
 
 @app.route('/importation-masse', methods=['GET', 'POST'])
 def importation_masse():
@@ -92,7 +88,7 @@ def importation_masse():
             cur.close()
             conn.close()
             msg = f"🚀 {mots_ajoutes} mots ajoutés !"
-    return render_template("layout.html", total_mots=compter_mots(), bulk_msg=msg, import_actif=True)
+    return render_template("import.html", total_mots=compter_mots(), bulk_msg=msg, page="import")
 
 @app.route('/liste-mots')
 def liste_mots():
@@ -103,7 +99,7 @@ def liste_mots():
     mots = cur.fetchall()
     cur.close()
     conn.close()
-    return render_template("liste.html", total_mots=compter_mots(), mots=mots)
+    return render_template("liste.html", total_mots=compter_mots(), mots=mots, page="liste")
 
 @app.route('/connexion', methods=['GET', 'POST'])
 def connexion():
@@ -121,7 +117,7 @@ def connexion():
             session['utilisateur'] = identifiant
             return redirect(url_for('index'))
         erreur = "Identifiant ou mot de passe incorrect."
-    return render_template("layout.html", auth_mode="login", erreur=erreur)
+    return render_template("auth.html", auth_mode="login", erreur=erreur)
 
 @app.route('/inscription', methods=['GET', 'POST'])
 def inscription():
@@ -141,7 +137,7 @@ def inscription():
                 session['utilisateur'] = identifiant
                 return redirect(url_for('index'))
             except Exception: erreur = "Identifiant déjà pris."
-    return render_template("layout.html", auth_mode="register", erreur=erreur)
+    return render_template("auth.html", auth_mode="register", erreur=erreur)
 
 @app.route('/deconnexion')
 def deconnexion():
