@@ -57,6 +57,22 @@ def rechercher():
     conn.close()
     return render_template("index.html", total_mots=compter_mots(), resultats=resultats, tirage=lettres, sig=sig, page="index")
 
+@app.route('/vider-base', methods=['POST'])
+def vider_base():
+    if 'utilisateur' not in session: return redirect(url_for('connexion'))
+    try:
+        conn = psycopg.connect(DATABASE_URL)
+        cur = conn.cursor()
+        # Supprime instantanément l'INTEGRALITE des lignes de la table
+        cur.execute("TRUNCATE TABLE anagrammes;")
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception:
+        pass
+    return redirect(url_for('liste_mots'))
+
+
 @app.route('/ajouter', methods=['GET', 'POST'])
 def ajouter():
     if 'utilisateur' not in session: return redirect(url_for('connexion'))
