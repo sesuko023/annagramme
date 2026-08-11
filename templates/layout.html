@@ -43,10 +43,11 @@
         <h2><i class="nf nf-custom_folder_open"></i> Anagrammeur</h2>
         <div class="counter-box"><i class="nf nf-fa-database"></i><span><strong>{{ total_mots }}</strong> mots indexés</span></div>
         
-        <a href="/" class="{% if page == 'index' %}active{% endif %}"><i class="nf nf-fa-search"></i> Recherche</a>
-        <a href="/ajouter" class="{% if page == 'ajouter' %}active{% endif %}"><i class="nf nf-fa-plus_circle"></i> Ajout manuel</a>
-        <a href="/importation-masse" class="{% if page == 'import' %}active{% endif %}"><i class="nf nf-fa-bolt"></i> Importation en masse</a>
-        <a href="/liste-mots" class="{% if page == 'liste' %}active{% endif %}"><i class="nf nf-fa-list"></i> Liste des mots</a>
+        <a href="/"><i class="fa-solid fa-magnifying-glass"></i> Recherche</a>
+        <a href="/ajouter"><i class="fa-solid fa-circle-plus"></i> Ajout manuel</a>
+        <a href="/importation-masse"><i class="fa-solid fa-bolt"></i> Importation en masse</a>
+        <a href="/liste-mots"><i class="fa-solid fa-list-check"></i> Liste des mots</a>
+
         
         <button id="theme-toggle" class="theme-btn"><i class="nf nf-fa-moon_o"></i> <span>Mode Sombre</span></button>
         <div class="user-info">Actor: <strong>@{{ session.get('utilisateur') }}</strong><a href="/deconnexion" class="btn-logout">Sign out</a></div>
