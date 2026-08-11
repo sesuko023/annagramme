@@ -1,5 +1,6 @@
 import os
 import psycopg
+import unicodedata
 from flask import Flask, request, render_template, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -16,8 +17,16 @@ def initialiser_bdd():
     cur.close()
     conn.close()
 
-def generer_signature(mot):
-    return "".join(sorted(mot.lower().strip()))
+def nettoyer_mot(texte):
+    """Met en majuscules et supprime tous les accents (ex: niché -> NICHE)."""
+    if not texte: return ""
+    texte_normalise = unicodedata.normalize('NFD', texte.strip())
+    texte_sans_accent = "".join(c for c in texte_normalise if unicodedata.category(c) != 'Mn')
+    return "".join(c for c in texte_sans_accent if c.isalpha()).upper()
+
+def generer_signature(mot_propre):
+    """Trie les lettres d'un mot déjà nettoyé."""
+    return "".join(sorted(mot_propre))
 
 def compter_mots():
     try:
@@ -39,7 +48,9 @@ def index():
 def rechercher():
     if 'utilisateur' not in session: return redirect(url_for('connexion'))
     lettres = request.args.get('lettres', '').strip()
-    sig = generer_signature(lettres)
+    lettres_propres = nettoyer_mot(lettres)
+    sig = generer_signature(lettres_propres)
+    
     conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("SELECT mot FROM anagrammes WHERE signature = %s ORDER BY mot ASC", (sig,))
@@ -53,15 +64,16 @@ def ajouter():
     if 'utilisateur' not in session: return redirect(url_for('connexion'))
     msg, err = "", ""
     if request.method == 'POST':
-        mot = request.form.get('nouveau_mot', '').strip().lower()
-        if mot:
-            sig = generer_signature(mot)
+        mot_brut = request.form.get('nouveau_mot', '')
+        mot_propre = nettoyer_mot(mot_brut)
+        if mot_propre:
+            sig = generer_signature(mot_propre)
             try:
                 conn = psycopg.connect(DATABASE_URL)
                 cur = conn.cursor()
-                cur.execute("INSERT INTO anagrammes (signature, mot) VALUES (%s, %s) ON CONFLICT (mot) DO NOTHING", (sig, mot))
+                cur.execute("INSERT INTO anagrammes (signature, mot) VALUES (%s, %s) ON CONFLICT (mot) DO NOTHING", (sig, mot_propre))
                 conn.commit()
-                msg = f'✔️ Mot "{mot}" indexé !' if cur.rowcount > 0 else f'⚠️ Le mot "{mot}" existe déjà.'
+                msg = f'✔️ Mot "{mot_propre}" indexé !' if cur.rowcount > 0 else f'⚠️ Le mot "{mot_propre}" existe déjà.'
                 cur.close()
                 conn.close()
             except Exception: err = "Erreur d'écriture."
@@ -79,8 +91,8 @@ def importation_masse():
             conn = psycopg.connect(DATABASE_URL)
             cur = conn.cursor()
             for m in mots_bruts:
-                mot_propre = m.strip().lower()
-                if mot_propre.isalpha():
+                mot_propre = nettoyer_mot(m)
+                if mot_propre:
                     sig = generer_signature(mot_propre)
                     cur.execute("INSERT INTO anagrammes (signature, mot) VALUES (%s, %s) ON CONFLICT (mot) DO NOTHING", (sig, mot_propre))
                     if cur.rowcount > 0: mots_ajoutes += 1
@@ -95,8 +107,8 @@ def liste_mots():
     if 'utilisateur' not in session: return redirect(url_for('connexion'))
     conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
-    cur.execute("SELECT mot, signature FROM anagrammes ORDER BY mot ASC;")
-    mots = cur.fetchall()
+    cur.execute("SELECT mot FROM anagrammes ORDER BY mot ASC;")
+    mots = [row[0] for row in cur.fetchall()]
     cur.close()
     conn.close()
     return render_template("liste.html", total_mots=compter_mots(), mots=mots, page="liste")
@@ -104,7 +116,7 @@ def liste_mots():
 @app.route('/supprimer-mot', methods=['POST'])
 def supprimer_mot():
     if 'utilisateur' not in session: return redirect(url_for('connexion'))
-    mot = request.form.get('mot_a_supprimer', '').strip().lower()
+    mot = request.form.get('mot_a_supprimer', '').strip().upper()
     if mot:
         conn = psycopg.connect(DATABASE_URL)
         cur = conn.cursor()
