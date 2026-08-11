@@ -28,7 +28,7 @@ def generer_signature(mot_propre):
     return "".join(sorted(mot_propre))
 
 def compter_mots():
-    """Compte le nombre de mots de manière sécurisée en extrayant le premier élément [0]."""
+    """Compte le nombre de mots de manière sécurisée en extrayant l'entier brut."""
     try:
         conn = psycopg.connect(DATABASE_URL)
         cur = conn.cursor()
@@ -36,7 +36,7 @@ def compter_mots():
         resultat = cur.fetchone()
         cur.close()
         conn.close()
-        return resultat[0] if resultat else 0  # FIX : Extrait le chiffre du tuple (ex: 868 au lieu de (868,))
+        return resultat[0] if resultat else 0  # Extraction de l'entier du tuple (ex: 868)
     except Exception: return 0
 
 @app.route('/')
@@ -54,7 +54,7 @@ def rechercher():
     conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("SELECT mot FROM anagrammes WHERE signature = %s ORDER BY mot ASC", (sig,))
-    resultats = [row[0] for row in cur.fetchall()]  # FIX : Extrait le texte pur du tuple
+    resultats = [row[0] for row in cur.fetchall()]  # Extraction du texte propre de chaque ligne
     cur.close()
     conn.close()
     return render_template("index.html", total_mots=compter_mots(), resultats=resultats, tirage=lettres, sig=sig, page="index")
@@ -73,9 +73,7 @@ def ajouter():
                 cur = conn.cursor()
                 cur.execute("INSERT INTO anagrammes (signature, mot) VALUES (%s, %s) ON CONFLICT (mot) DO NOTHING", (sig, mot_propre))
                 conn.commit()
-                # On vérifie si la ligne a été insérée
-                if cur.rowcount and cur.rowcount > 0: msg = f'✔️ Mot "{mot_propre}" indexé !'
-                else: err = f'⚠️ Le mot "{mot_propre}" existe déjà.'
+                msg = f'✔️ Mot "{mot_propre}" indexé !'
                 cur.close()
                 conn.close()
             except Exception: err = "Erreur d'écriture."
@@ -100,22 +98,30 @@ def importation_masse():
         mots_bruts = texte_brut.replace(',', ' ').split()
         
         if mots_bruts:
-            # Pour éviter le bug de soustraction, on compte simplement le nombre de mots à ajouter
-            mots_traites = 0
             conn = psycopg.connect(DATABASE_URL)
             cur = conn.cursor()
+            
+            # Préparation du bloc de données groupées
+            tuples_mots = []
+            mots_vus = set()
             for m in mots_bruts:
                 mot_propre = nettoyer_mot(m)
-                if mot_propre:
+                if mot_propre and mot_propre not in mots_vus:
+                    mots_vus.add(mot_propre)
                     sig = generer_signature(mot_propre)
-                    cur.execute("INSERT INTO anagrammes (signature, mot) VALUES (%s, %s) ON CONFLICT (mot) DO NOTHING", (sig, mot_propre))
-                    mots_traites += 1
+                    tuples_mots.append((sig, mot_propre))
+            
+            # ENVOI EN MASSE OPTIMISÉ : 1 seule requête réseau pour tout le fichier !
+            if tuples_mots:
+                cur.executemany(
+                    "INSERT INTO anagrammes (signature, mot) VALUES (%s, %s) ON CONFLICT (mot) DO NOTHING",
+                    tuples_mots
+                )
+                
             conn.commit()
             cur.close()
             conn.close()
-            
-            # Message générique clair pour éviter tout calcul instable entre variables
-            msg = f"🚀 Traitement terminé ! Votre fichier a été analysé et les mots uniques ont été indexés."
+            msg = f"🚀 Traitement en masse terminé avec succès !"
         else:
             msg = "⚠️ Aucun mot trouvé. Veuillez sélectionner un fichier ou écrire du texte."
             
@@ -127,7 +133,7 @@ def liste_mots():
     conn = psycopg.connect(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("SELECT mot FROM anagrammes ORDER BY mot ASC;")
-    mots = [row[0] for row in cur.fetchall()]  # FIX : Extrait le texte pur du dictionnaire
+    mots = [row[0] for row in cur.fetchall()]  # Extraction du texte propre de chaque ligne
     cur.close()
     conn.close()
     return render_template("liste.html", total_mots=compter_mots(), mots=mots, page="liste")
@@ -170,7 +176,7 @@ def connexion():
         compte = cur.fetchone()
         cur.close()
         conn.close()
-        if compte and check_password_hash(compte[0], mot_de_passe):  # FIX : Extrait la chaîne de caractères pure
+        if compte and check_password_hash(compte[0], mot_de_passe):  # Extraction du hash propre
             session['utilisateur'] = identifiant
             return redirect(url_for('index'))
         erreur = "Identifiant ou mot de passe incorrect."
