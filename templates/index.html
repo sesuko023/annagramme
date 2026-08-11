@@ -1,24 +1,14 @@
 {% extends "layout.html" %}
-{% block title %}Rechercher{% endblock %}
 {% block content %}
-<div class="container">
-    <h1>🔎 Rechercher par lettres</h1>
-    <form method="GET" action="/rechercher">
-        <input type="text" name="lettres" placeholder="Ex: ehcin" value="{{ tirage or '' }}" required>
-        <input type="submit" value="Rechercher">
-    </form>
-    
-    {% if resultats is not none %}
-        <h3>Résultats pour "{{ tirage }}" :</h3>
-        {% if resultats %}
-            <ul>
-            {% for row in resultats %}
-                <li><strong>{{ row['mot'] }}</strong></li>
-            {% endfor %}
-            </ul>
-        {% else %}
-            <p>Aucun anagramme trouvé.</p>
-        {% endif %}
-    {% endif %}
-</div>
+<h1>🔎 Code Query (Recherche)</h1>
+<form method="GET" action="/rechercher">
+    <input type="text" name="lettres" placeholder="Entrez vos lettres (ex: ehcin)" value="{{ tirage or '' }}" required style="width:75%; margin-right:10px;">
+    <input type="submit" value="Search">
+</form>
+{% if resultats is not none %}
+    <h3>Results for "{{ tirage }}" :</h3>
+    {% if resultats %}
+        <ul>{% for row in resultats %}<li><strong>{{ row[0] }}</strong> <span class="badge">{{ sig }}</span></li>{% endfor %}</ul>
+    {% else %}<p>Aucun anagramme trouvé dans la base.</p>{% endif %}
+{% endif %}
 {% endblock %}
