@@ -4,51 +4,225 @@
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %} - Anagrammeur</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; display: flex; height: 100vh; background: #f8f9fa; }
-        .sidebar { width: 250px; background: #2c3e50; color: white; display: flex; flex-direction: column; padding: 20px 0; box-sizing: border-box; }
-        .sidebar h2 { text-align: center; margin-bottom: 30px; font-size: 1.5em; color: #ecf0f1; }
-        .sidebar a { padding: 15px 25px; color: #bdc3c7; text-decoration: none; font-size: 1.1em; transition: 0.2s; border-left: 4px solid transparent; }
-        .sidebar a:hover { background: #34495e; color: white; border-left-color: #3498db; }
-        .sidebar a.active { background: #34495e; color: white; border-left-color: #2ecc71; font-weight: bold; }
-        .sidebar .user-info { margin-top: auto; padding: 20px; background: #1a252f; text-align: center; font-size: 0.9em; }
-        .sidebar .btn-logout { display: inline-block; margin-top: 10px; background: #e74c3c; color: white; padding: 5px 15px; text-decoration: none; border-radius: 4px; }
-        .content { flex: 1; padding: 40px; box-sizing: border-box; overflow-y: auto; }
-        .container { max-width: 700px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .section { margin-bottom: 25px; }
-        h1 { color: #2c3e50; margin-top: 0; }
-        input[type="text"], input[type="password"] { width: 70%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; margin-bottom: 10px; }
-        .auth-box input[type="text"], .auth-box input[type="password"] { width: 100%; }
-        input[type="submit"] { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; font-weight: bold; }
-        input[type="submit"]:hover { background: #2980b9; }
-        .message { color: #27ae60; font-weight: bold; padding: 10px; background: #e8f8f5; border-radius: 4px; }
-        .error { color: #e74c3c; font-weight: bold; }
-        ul { background: #f1f2f6; padding: 15px 35px; border-radius: 4px; }
-        li { margin-bottom: 5px; font-size: 1.1em; color: #2f3542; }
-        .auth-container { max-width: 400px; margin: 80px auto; }
+        /* Palette de couleurs & polices inspirées de GitHub (Primer UI) */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"; 
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            height: 100vh; 
+            background: #ffffff; 
+            color: #1f2328;
+        }
+        
+        /* Menu de navigation à gauche */
+        .sidebar { 
+            width: 260px; 
+            background: #f6f8fa; 
+            color: #1f2328; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 24px 0; 
+            box-sizing: border-box; 
+            border-right: 1px solid #d0d7de;
+        }
+        .sidebar h2 { 
+            font-size: 1.1em; 
+            font-weight: 600;
+            padding: 0 16px;
+            margin-top: 0;
+            margin-bottom: 20px; 
+            color: #1f2328; 
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sidebar a { 
+            padding: 8px 16px; 
+            color: #1f2328; 
+            text-decoration: none; 
+            font-size: 0.95em; 
+            transition: 0.1s; 
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 3px solid transparent;
+        }
+        .sidebar a:hover { 
+            background: #eaeef2; 
+        }
+        .sidebar a.active { 
+            background: #ffffff; 
+            font-weight: 600;
+            border-left-color: #fd8c73; /* Couleur orange d'accentuation GitHub (comme les onglets de dépôts) */
+        }
+        .sidebar .counter-box {
+            margin: 0 16px 16px 16px;
+            font-size: 0.85em;
+            background: #eff1f3;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #d0d7de;
+            color: #65717c;
+        }
+        .sidebar .user-info { 
+            margin-top: auto; 
+            padding: 16px; 
+            background: #f6f8fa; 
+            border-top: 1px solid #d0d7de;
+            font-size: 0.85em; 
+            color: #636c76;
+        }
+        .sidebar .btn-logout { 
+            display: block; 
+            margin-top: 8px; 
+            background: #f6f8fa; 
+            color: #cf222e; 
+            padding: 4px 12px; 
+            text-decoration: none; 
+            border: 1px solid #d0d7de;
+            border-radius: 6px; 
+            text-align: center;
+            font-weight: 600;
+        }
+        .sidebar .btn-logout:hover {
+            background: #cf222e;
+            color: #ffffff;
+            border-color: #cf222e;
+        }
+
+        /* Conteneur principal à droite */
+        .content { 
+            flex: 1; 
+            padding: 32px; 
+            box-sizing: border-box; 
+            overflow-y: auto; 
+            background: #ffffff;
+        }
+        .container { 
+            max-width: 800px; 
+            background: #ffffff; 
+            padding: 24px; 
+            border: 1px solid #d0d7de;
+            border-radius: 6px; 
+        }
+        h1, h2, h3 { 
+            font-weight: 600;
+            color: #1f2328; 
+            margin-top: 0; 
+        }
+        h1 { font-size: 1.5em; border-bottom: 1px solid #d0d7de; padding-bottom: 8px; margin-bottom: 20px;}
+        h2 { font-size: 1.25em; }
+
+        /* Éléments de formulaires GitHub */
+        input[type="text"], input[type="password"] { 
+            width: 70%; 
+            padding: 6px 12px; 
+            border: 1px solid #d0d7de; 
+            border-radius: 6px; 
+            font-size: 0.9em; 
+            background: #f6f8fa;
+            color: #1f2328;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
+        }
+        input[type="text"]:focus, input[type="password"]:focus {
+            background: #ffffff;
+            border-color: #0969da;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(9,105,218,0.3);
+        }
+        .auth-box input[type="text"], .auth-box input[type="password"] { 
+            width: 100%; 
+            margin-bottom: 12px;
+        }
+        input[type="submit"] { 
+            padding: 6px 16px; 
+            background: #1f883d; /* Vert de validation GitHub */
+            color: #ffffff; 
+            border: 1px solid rgba(31,136,61,0.15); 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 0.9em; 
+            font-weight: 600; 
+        }
+        input[type="submit"]:hover { 
+            background: #1a7f37; 
+        }
+        
+        /* Alertes et notifications */
+        .message { 
+            color: #1a7f37; 
+            font-size: 0.9em;
+            font-weight: 500; 
+            padding: 12px 16px; 
+            background: #dafbe1; 
+            border: 1px solid #4ac26b;
+            border-radius: 6px; 
+            margin-bottom: 16px;
+        }
+        .error { 
+            color: #cf222e; 
+            font-size: 0.9em;
+            font-weight: 500; 
+            padding: 12px 16px; 
+            background: #ffebe9; 
+            border: 1px solid #ff8181;
+            border-radius: 6px; 
+            margin-bottom: 16px;
+        }
+        
+        /* Listes de mots typées GitHub */
+        ul { 
+            padding: 0; 
+            margin: 16px 0;
+            list-style: none;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+        }
+        li { 
+            padding: 12px 16px; 
+            font-size: 0.95em; 
+            color: #1f2328; 
+            border-bottom: 1px solid #d0d7de;
+            background: #ffffff;
+        }
+        li:last-child {
+            border-bottom: none;
+        }
+        
+        /* Petits badges gris (comme les tags de releases GitHub) */
+        .badge {
+            background: #eff1f3;
+            color: #57606a;
+            font-size: 0.8em;
+            padding: 2px 8px;
+            border-radius: 2em;
+            border: 1px solid #d0d7de;
+            font-family: monospace;
+            margin-left: 8px;
+        }
+        .auth-container { max-width: 340px; margin: 100px auto; }
     </style>
 </head>
 <body>
     {% if session.get('utilisateur') %}
     <div class="sidebar">
-        <h2>🔤 Anagrammeur</h2>
+        <h2>📁 Anagram-Repo</h2>
         
-        <!-- Affichage du compteur dynamique sous le titre -->
-        <div style="text-align: center; margin-top: -20px; margin-bottom: 25px; font-size: 0.9em; color: #2ecc71; background: #1a252f; padding: 5px 10px; margin-left: 20px; margin-right: 20px; border-radius: 4px;">
-            <strong>{{ total_mots }}</strong> mot(s) en base
+        <div class="counter-box">
+            📦 <strong>{{ total_mots }}</strong> mot(s) indexé(s)
         </div>
 
-        <a href="/" class="{% if request.endpoint == 'index' or request.endpoint == 'rechercher' %}active{% endif %}">🔎 Rechercher</a>
-        <a href="/ajouter-mot" class="{% if request.endpoint == 'ajouter_mot' %}active{% endif %}">📥 Ajouter un mot</a>
-        <a href="/liste-mots" class="{% if request.endpoint == 'liste_mots' %}active{% endif %}">📋 Liste des mots</a>
+        <a href="/" class="{% if request.endpoint == 'index' or request.endpoint == 'rechercher' %}active{% endif %}">🔎 Code Query</a>
+        <a href="/ajouter-mot" class="{% if request.endpoint == 'ajouter_mot' %}active{% endif %}">📥 Push un mot</a>
+        <a href="/liste-mots" class="{% if request.endpoint == 'liste_mots' %}active{% endif %}">📋 Main Database</a>
         
         <div class="user-info">
-            Connecté : <strong>{{ session['utilisateur'] }}</strong><br>
-            <a href="/deconnexion" class="btn-logout">Déconnexion</a>
+            Actor: <strong>@{{ session['utilisateur'] }}</strong><br>
+            <a href="/deconnexion" class="btn-logout">Sign out</a>
         </div>
     </div>
     {% endif %}
-
-
     <div class="content">
         {% block content %}{% endblock %}
     </div>
